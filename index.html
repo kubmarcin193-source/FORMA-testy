@@ -184,6 +184,10 @@ body.workout-player-open{overflow:hidden;overscroll-behavior:none}
     <form id="appAuthForm" onsubmit="authenticateFormaPro(event)">
       <label for="appAuthPassword">Hasło</label>
       <input id="appAuthPassword" type="password" autocomplete="current-password" inputmode="text" placeholder="Wpisz hasło" aria-describedby="authMessage">
+      <div id="appAuthConfirmWrap" class="hidden">
+        <label for="appAuthPasswordConfirm">Powtórz hasło</label>
+        <input id="appAuthPasswordConfirm" type="password" autocomplete="new-password" inputmode="text" placeholder="Powtórz hasło" aria-describedby="authMessage">
+      </div>
       <button id="appAuthButton" class="primary" type="submit">Odblokuj aplikację</button>
       <div id="authMessage" class="authMessage" aria-live="polite"></div>
     </form>
@@ -1660,7 +1664,7 @@ function render(){
 }
 /* ===== FORMA PRO v12: kopie, migracje, progres, biblioteka, zdjęcia i kalendarz ===== */
 const APP_DATA_VERSION=15;
-const APP_RELEASE="17.2.0";
+const APP_RELEASE="17.3.0";
 const BACKUP_FORMAT_VERSION=4;
 const EXERCISE_BACKUP_VERSION=1;
 const AUTO_BACKUP_DB="forma_pro_auto_backup_db_v1";
@@ -2526,11 +2530,13 @@ Object.assign(window,{setCalendarVisibility,openCalendarIcon,openSetEditor,rende
 
 
 
-/* ===== Blokada dostępu aplikacji ===== */
-const APP_AUTH_PBKDF2_SALT_B64="2H9io6q7SoI2MeI174H51g==";
-const APP_AUTH_PBKDF2_EXPECTED_B64="C5vFO59Rm+dz2ZaRnbzv8V57Ns8SsLMRBNBYT+jNO3o=";
-const APP_AUTH_PBKDF2_ITERATIONS=210000;
-const APP_AUTH_MOBILE_TRUST_KEY="forma_pro_mobile_verified_v1";
+/* ===== Blokada dostępu aplikacji =====
+   Hasło nie jest zapisane w plikach aplikacji.
+   Przy pierwszym uruchomieniu tej instalacji użytkownik ustawia własne hasło.
+   Losowa sól i weryfikator PBKDF2 są tworzone i zapisywane wyłącznie lokalnie w przeglądarce. */
+const APP_AUTH_CONFIG_KEY="forma_pro_auth_config_v2";
+const APP_AUTH_PBKDF2_ITERATIONS=310000;
+const APP_AUTH_MOBILE_TRUST_KEY="forma_pro_mobile_verified_v2";
 const APP_AUTH_DESKTOP_IDLE_MS=5*60*1000;
 let formaAuthIsPhone=false;
 let formaAuthUnlocked=false;
@@ -2554,15 +2560,34 @@ function base64FromBytes(bytes){
  bytes.forEach(b=>raw+=String.fromCharCode(b));
  return btoa(raw);
 }
-async function deriveFormaPasswordVerifier(value){
+function getFormaAuthConfig(){
+ try{
+  const cfg=JSON.parse(localStorage.getItem(APP_AUTH_CONFIG_KEY)||"null");
+  if(!cfg||typeof cfg!=="object"||!cfg.salt||!cfg.verifier)return null;
+  return {salt:String(cfg.salt),verifier:String(cfg.verifier),iterations:Number(cfg.iterations)||APP_AUTH_PBKDF2_ITERATIONS};
+ }catch{return null}
+}
+function createFormaAuthSalt(){
+ if(!window.crypto?.getRandomValues)throw new Error("Ta przeglądarka nie obsługuje bezpiecznego generatora losowego.");
+ const salt=new Uint8Array(16);
+ crypto.getRandomValues(salt);
+ return base64FromBytes(salt);
+}
+async function deriveFormaPasswordVerifier(value,saltB64,iterations=APP_AUTH_PBKDF2_ITERATIONS){
  if(!window.crypto?.subtle)throw new Error("Ta przeglądarka nie obsługuje bezpiecznej weryfikacji hasła.");
  const keyMaterial=await crypto.subtle.importKey(
   "raw",new TextEncoder().encode(value),"PBKDF2",false,["deriveBits"]
  );
  const bits=await crypto.subtle.deriveBits({
-  name:"PBKDF2",salt:bytesFromBase64(APP_AUTH_PBKDF2_SALT_B64),iterations:APP_AUTH_PBKDF2_ITERATIONS,hash:"SHA-256"
+  name:"PBKDF2",salt:bytesFromBase64(saltB64),iterations,hash:"SHA-256"
  },keyMaterial,256);
  return base64FromBytes(new Uint8Array(bits));
+}
+function secureVerifierEqual(a,b){
+ if(typeof a!=="string"||typeof b!=="string"||a.length!==b.length)return false;
+ let diff=0;
+ for(let i=0;i<a.length;i++)diff|=a.charCodeAt(i)^b.charCodeAt(i);
+ return diff===0;
 }
 function setFormaAuthMessage(text,type=""){
  const el=document.getElementById("authMessage");
@@ -2573,14 +2598,31 @@ function setFormaAuthMessage(text,type=""){
 function setFormaAuthScreen(reason=""){
  const desc=document.getElementById("authDescription");
  const rule=document.getElementById("authRule");
- if(formaAuthIsPhone){
-  if(desc)desc.textContent="Pierwsze uruchomienie na tym telefonie wymaga potwierdzenia hasłem.";
-  if(rule)rule.textContent="Po poprawnym zalogowaniu ten telefon zostanie zapamiętany i przy kolejnych uruchomieniach hasło nie będzie wymagane.";
+ const confirmWrap=document.getElementById("appAuthConfirmWrap");
+ const input=document.getElementById("appAuthPassword");
+ const confirm=document.getElementById("appAuthPasswordConfirm");
+ const button=document.getElementById("appAuthButton");
+ const configured=!!getFormaAuthConfig();
+ if(!configured){
+  if(desc)desc.textContent="Ustaw hasło dla tej instalacji aplikacji.";
+  if(rule)rule.textContent="Hasło nie trafi do plików na GitHubie. Losowa sól i weryfikator zostaną zapisane wyłącznie lokalnie w tej przeglądarce. Na innym urządzeniu ustawisz hasło osobno.";
+  confirmWrap?.classList.remove("hidden");
+  if(input){input.autocomplete="new-password";input.placeholder="Ustaw hasło"}
+  if(confirm)confirm.value="";
+  if(button)button.textContent="Ustaw hasło i uruchom";
  }else{
-  if(desc)desc.textContent=reason||"Wprowadź hasło, aby uruchomić aplikację na komputerze.";
-  if(rule)rule.textContent="Na komputerze hasło jest wymagane przy każdym ponownym uruchomieniu. Po 5 minutach bezczynności aplikacja zostanie automatycznie zablokowana.";
+  confirmWrap?.classList.add("hidden");
+  if(input){input.autocomplete="current-password";input.placeholder="Wpisz hasło"}
+  if(button)button.textContent="Odblokuj aplikację";
+  if(formaAuthIsPhone){
+   if(desc)desc.textContent="Pierwsze uruchomienie na tym telefonie wymaga potwierdzenia lokalnym hasłem.";
+   if(rule)rule.textContent="Po poprawnym zalogowaniu ten telefon zostanie zapamiętany i przy kolejnych uruchomieniach hasło nie będzie wymagane.";
+  }else{
+   if(desc)desc.textContent=reason||"Wprowadź lokalne hasło, aby uruchomić aplikację na komputerze.";
+   if(rule)rule.textContent="Na komputerze hasło jest wymagane przy każdym ponownym uruchomieniu. Po 5 minutach bezczynności aplikacja zostanie automatycznie zablokowana.";
+  }
  }
- requestAnimationFrame(()=>document.getElementById("appAuthPassword")?.focus());
+ requestAnimationFrame(()=>input?.focus());
 }
 function startFormaDesktopIdleTimer(){
  if(formaAuthIsPhone||!formaAuthUnlocked)return;
@@ -2641,25 +2683,45 @@ async function unlockFormaPro(rememberPhone=false){
 async function authenticateFormaPro(event){
  event?.preventDefault();
  const input=document.getElementById("appAuthPassword");
+ const confirm=document.getElementById("appAuthPasswordConfirm");
  const button=document.getElementById("appAuthButton");
  const value=input?.value||"";
- if(!value){setFormaAuthMessage("Wpisz hasło.","error");input?.focus();return false}
+ const cfg=getFormaAuthConfig();
+ if(!value){setFormaAuthMessage(cfg?"Wpisz hasło.":"Ustaw hasło.","error");input?.focus();return false}
  if(button)button.disabled=true;
  try{
-  const digest=await deriveFormaPasswordVerifier(value);
-  if(digest!==APP_AUTH_PBKDF2_EXPECTED_B64){
+  if(!cfg){
+   if(value.length<6){setFormaAuthMessage("Hasło musi mieć co najmniej 6 znaków.","error");input?.focus();return false}
+   if(value!==(confirm?.value||"")){setFormaAuthMessage("Hasła nie są identyczne.","error");if(confirm){confirm.value="";confirm.focus()}return false}
+   const salt=createFormaAuthSalt();
+   const verifier=await deriveFormaPasswordVerifier(value,salt,APP_AUTH_PBKDF2_ITERATIONS);
+   localStorage.setItem(APP_AUTH_CONFIG_KEY,JSON.stringify({version:2,salt,verifier,iterations:APP_AUTH_PBKDF2_ITERATIONS,createdAt:new Date().toISOString()}));
+   if(input)input.value="";
+   if(confirm)confirm.value="";
+   setFormaAuthMessage("Hasło zapisano lokalnie.","ok");
+   await unlockFormaPro(formaAuthIsPhone);
+   return true;
+  }
+  const digest=await deriveFormaPasswordVerifier(value,cfg.salt,cfg.iterations);
+  if(!secureVerifierEqual(digest,cfg.verifier)){
    setFormaAuthMessage("Nieprawidłowe hasło.","error");
    if(input){input.value="";input.focus()}
    return false;
   }
+  if(input)input.value="";
   setFormaAuthMessage("Hasło poprawne.","ok");
   await unlockFormaPro(formaAuthIsPhone);
   return true;
+ }catch(error){
+  console.error("Błąd zabezpieczenia aplikacji:",error);
+  setFormaAuthMessage("Nie udało się skonfigurować zabezpieczenia w tej przeglądarce.","error");
+  return false;
  }finally{if(button)button.disabled=false}
 }
 async function startFormaProWithAuthentication(){
  formaAuthIsPhone=isFormaPhone();
- if(formaAuthIsPhone&&localStorage.getItem(APP_AUTH_MOBILE_TRUST_KEY)==="1"){
+ const cfg=getFormaAuthConfig();
+ if(cfg&&formaAuthIsPhone&&localStorage.getItem(APP_AUTH_MOBILE_TRUST_KEY)==="1"){
   await unlockFormaPro(false);
   return;
  }

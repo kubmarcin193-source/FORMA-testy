@@ -1,20 +1,15 @@
-Forma PRO PWA v17.2
+Forma PRO PWA v17.3
 Data: 2026-08-04
 
-Nowości v17.2:
-- jedno centralne zdjęcie ćwiczenia w bibliotece
-- zdjęcie z biblioteki jest automatycznie używane we wszystkich zestawach, gdy nazwa ćwiczenia jest taka sama
-- zgodność działa również dla starszych zestawów, nawet gdy nie miały wcześniej poprawnego połączenia z biblioteką
-- zdjęcie z biblioteki jest używane na liście zestawów, ekranie aktywnego ćwiczenia i w pełnoekranowym trybie treningowym
-- Forma PRO Studio pokazuje wspólne zdjęcie od razu we wszystkich zestawach
-- eksport i import zachowują centralne powiązanie zdjęć
+Nowości v17.3:
+- usunięto z publicznych plików stałą sól i weryfikator hasła aplikacji
+- przy pierwszym uruchomieniu każdej instalacji użytkownik sam ustawia lokalne hasło
+- sól i weryfikator PBKDF2-SHA-256 powstają losowo dopiero w przeglądarce i nie trafiają do GitHuba
+- telefon po pierwszym poprawnym uruchomieniu może pozostać zapamiętany
+- komputer wymaga hasła po uruchomieniu i blokuje aplikację po 5 minutach bezczynności
+- zachowano centralne zdjęcia ćwiczeń z v17.2
 
-Poprzednie funkcje v17.1:
-- pełnoekranowy tryb treningowy
-- blokada wygaszania ekranu podczas treningu
-- automatyczny zapis i wznowienie postępu
-- gotowe zestawy na ławeczkę i gumy oporowe
-
-Bezpieczeństwo:
-- brak jawnych danych uwierzytelniających w plikach publicznych
-- weryfikacja hasła korzysta z PBKDF2-SHA-256
+Bezpieczeństwo paczki publicznej:
+- brak jawnego hasła
+- brak wbudowanego weryfikatora konkretnego hasła
+- brak danych osobowych, zdjęć użytkownika, adresów e-mail, numerów telefonu, tokenów i kluczy API
