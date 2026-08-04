@@ -1,36 +1,29 @@
-FORMA PRO PWA v16
+FORMA PRO PWA v17.2
 
 WDROŻENIE NA GITHUB PAGES
 1. Rozpakuj ZIP.
 2. Usuń stare pliki aplikacji z repozytorium albo nadpisz je wszystkimi plikami z tej paczki.
 3. Wgraj pliki bez dodatkowego folderu — index.html ma leżeć bezpośrednio w katalogu publikowanym przez GitHub Pages.
 4. Zatwierdź zmiany i poczekaj na zakończenie wdrożenia.
-5. Otwórz WERSJA.txt na stronie. Powinien pokazać wersję v16.
+5. Otwórz WERSJA.txt na stronie. Powinien pokazać wersję v17.2.
+6. Po aktualizacji odśwież aplikację. Jeżeli stara wersja nadal jest widoczna, zamknij ją całkowicie i uruchom ponownie.
 
-NOWOŚCI v16
-- Osobny eksport zakładki Ćwiczenia obejmuje wszystkie zestawy, bibliotekę ćwiczeń, historię progresu i zdjęcia ćwiczeń z IndexedDB.
-- Import może połączyć ćwiczenia z istniejącymi albo zastąpić wyłącznie zakładkę Ćwiczenia.
-- Eksport/import jest dostępny w zakładce Ćwiczenia oraz w Ustawieniach/Celach.
-- Do paczki dołączono Forma-PRO-Studio.html — komputerowy edytor ćwiczeń i zestawów zgodny z formatem aplikacji.
-- Forma PRO Studio można otworzyć bezpośrednio z aplikacji na komputerze.
+CENTRALNE ZDJĘCIA ĆWICZEŃ
+- Zdjęcie dodane do ćwiczenia w bibliotece jest źródłem nadrzędnym.
+- Wszystkie ćwiczenia o tej samej nazwie automatycznie pokazują to samo zdjęcie w każdym zestawie.
+- Nie trzeba ponownie dodawać zdjęcia do każdej kopii ćwiczenia.
+- Zasada działa na liście ćwiczeń, w aktywnym treningu i w trybie pełnoekranowym.
+- Wielkość liter i dodatkowe spacje w nazwie nie wpływają na dopasowanie.
 
 FORMA PRO STUDIO
-1. W aplikacji wyeksportuj „Ćwiczenia, zestawy i zdjęcia”.
+1. W aplikacji wyeksportuj ćwiczenia, zestawy i zdjęcia.
 2. Otwórz Forma-PRO-Studio.html.
-3. Zaimportuj plik JSON, edytuj zestawy, ćwiczenia i zdjęcia.
-4. Wyeksportuj nowy JSON ze Studio.
-5. Zaimportuj go z powrotem do Forma PRO.
+3. Zaimportuj plik JSON.
+4. Otwórz Bibliotekę ćwiczeń i dodaj zdjęcie jeden raz do właściwego ćwiczenia.
+5. Zdjęcie automatycznie pojawi się przy ćwiczeniach o tej samej nazwie we wszystkich zestawach.
+6. Wyeksportuj projekt ze Studio i zaimportuj go z powrotem do Forma PRO.
 
 DANE I KOMPATYBILNOŚĆ
 - Aktualizacja nie usuwa pomiarów, treningów, posiłków, zdjęć ani ustawień.
-- Pełna kopia nadal obejmuje całą aplikację i wszystkie zdjęcia.
-- Zdjęcia ćwiczeń w osobnym eksporcie są zapisane wewnątrz pliku JSON.
-
-LOGOWANIE
-- Telefon: hasło wymagane tylko przy pierwszym uruchomieniu w danej przeglądarce.
-- Komputer: hasło wymagane przy każdym ponownym otwarciu lub odświeżeniu.
-- Komputer: po 5 minutach bezczynności aplikacja blokuje się automatycznie.
-
-
-FORMA PRO v16 — TRYB TRENINGOWY
-Po wybraniu zestawu kliknij „Start treningu”. Aplikacja uruchomi pełnoekranowy widok ćwiczenia i spróbuje zablokować wygaszanie ekranu. Postęp jest zapisywany lokalnie i można go wznowić.
+- Pełna kopia obejmuje całą aplikację i wszystkie zdjęcia.
+- Osobna kopia ćwiczeń obejmuje zestawy, bibliotekę, historię progresu i zdjęcia.

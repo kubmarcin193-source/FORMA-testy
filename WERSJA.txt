@@ -1,16 +1,20 @@
-Forma PRO PWA v17.1
-Data: 2026-08-03
+Forma PRO PWA v17.2
+Data: 2026-08-04
 
-Nowości:
-- pełnoekranowy tryb treningowy z jednym ćwiczeniem na ekranie
-- zdjęcie, opis, serie, powtórzenia, czas i odpoczynek
-- następne/poprzednie ćwiczenie oraz timer odpoczynku
-- blokada wygaszania ekranu podczas aktywnego treningu
+Nowości v17.2:
+- jedno centralne zdjęcie ćwiczenia w bibliotece
+- zdjęcie z biblioteki jest automatycznie używane we wszystkich zestawach, gdy nazwa ćwiczenia jest taka sama
+- zgodność działa również dla starszych zestawów, nawet gdy nie miały wcześniej poprawnego połączenia z biblioteką
+- zdjęcie z biblioteki jest używane na liście zestawów, ekranie aktywnego ćwiczenia i w pełnoekranowym trybie treningowym
+- Forma PRO Studio pokazuje wspólne zdjęcie od razu we wszystkich zestawach
+- eksport i import zachowują centralne powiązanie zdjęć
+
+Poprzednie funkcje v17.1:
+- pełnoekranowy tryb treningowy
+- blokada wygaszania ekranu podczas treningu
 - automatyczny zapis i wznowienie postępu
-- brak wylogowania po 5 minutach wyłącznie podczas otwartego trybu treningowego
-- dodane gotowe zestawy ćwiczeń na ławeczkę i gumy oporowe
-- ćwiczenia obejmują klatkę, barki, triceps, plecy, biceps, nogi, pośladki i brzuch
+- gotowe zestawy na ławeczkę i gumy oporowe
 
 Bezpieczeństwo:
-- usunięto jawne dane uwierzytelniające z plików publicznych
+- brak jawnych danych uwierzytelniających w plikach publicznych
 - weryfikacja hasła korzysta z PBKDF2-SHA-256

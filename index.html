@@ -1080,7 +1080,7 @@ function editExerciseGlobal(dayIdx,exIdx){
  <label>Bazowe powtórzenia</label><input id="exReps" value="${e.reps||""}">
  <label>Bazowy czas ćwiczenia / sekundy</label><input id="exSeconds" type="number" value="${e.seconds||""}">
  <label>Odpoczynek / sekundy</label><input id="exRest" type="number" value="${e.rest||60}">
- <label>Zdjęcie ćwiczenia</label><input id="exImg" type="file" accept="image/*">
+ <label>Zdjęcie ćwiczenia</label><input id="exImg" type="file" accept="image/*"><small class="muted">Zdjęcie zostanie zapisane centralnie w bibliotece i użyte we wszystkich zestawach z tą samą nazwą ćwiczenia.</small>
  <button class="primary" onclick="saveExerciseGlobal()">Zapisz ćwiczenie</button>
  </div>`;
  document.getElementById("exerciseEditor").scrollIntoView({behavior:"smooth"});
@@ -1659,8 +1659,8 @@ function render(){
  jobs.forEach(([name,fn])=>{try{fn()}catch(e){console.error("Błąd render():",name,e)}});
 }
 /* ===== FORMA PRO v12: kopie, migracje, progres, biblioteka, zdjęcia i kalendarz ===== */
-const APP_DATA_VERSION=14;
-const APP_RELEASE="17.1.0";
+const APP_DATA_VERSION=15;
+const APP_RELEASE="17.2.0";
 const BACKUP_FORMAT_VERSION=4;
 const EXERCISE_BACKUP_VERSION=1;
 const AUTO_BACKUP_DB="forma_pro_auto_backup_db_v1";
@@ -1856,7 +1856,23 @@ function cloneExercise(exr){
 function exerciseLibrary(){return jget(KEYS.exerciseLibrary,[])}
 function saveExerciseLibrary(list){jset(KEYS.exerciseLibrary,list)}
 function findLibraryExerciseFor(exr,lib=exerciseLibrary()){
- return lib.find(x=>String(x.id)===String(exr?.libraryId))||lib.find(x=>normalizeExerciseName(x.name)===normalizeExerciseName(exr?.name));
+ return lib.find(x=>normalizeExerciseName(x.name)===normalizeExerciseName(exr?.name))||(!String(exr?.name||'').trim()?lib.find(x=>String(x.id)===String(exr?.libraryId)):null);
+}
+function exerciseImageOwner(exr,lib=exerciseLibrary()){
+ const libraryExercise=findLibraryExerciseFor(exr,lib);
+ if(libraryExercise&&(libraryExercise.imgKey||libraryExercise.img))return libraryExercise;
+ return exr||{};
+}
+function exerciseImageReference(exr,lib=exerciseLibrary()){
+ const owner=exerciseImageOwner(exr,lib),fallback=owner===exr?{}:(exr||{});
+ const key=owner?.imgKey||'',legacy=owner?.img||'',fallbackKey=fallback?.imgKey||'',fallbackLegacy=fallback?.img||'';
+ return {key,legacy,fallbackKey,fallbackLegacy,token:[key,legacy,fallbackKey,fallbackLegacy].filter(Boolean).join('|')};
+}
+async function exerciseImageSrc(exr,lib=exerciseLibrary()){
+ const ref=exerciseImageReference(exr,lib);
+ const primary=await mediaSrc(ref.key,ref.legacy);
+ if(primary)return primary;
+ return mediaSrc(ref.fallbackKey,ref.fallbackLegacy);
 }
 function syncExerciseLibraryFromWorkouts(){
  const lib=exerciseLibrary(),w=workouts();let changed=false;
@@ -1866,6 +1882,9 @@ function syncExerciseLibraryFromWorkouts(){
    found={...JSON.parse(JSON.stringify(exr)),id:uid("lib")};delete found.libraryId;lib.push(found);changed=true;
   }
   if(exr.libraryId!==found.id){exr.libraryId=found.id;changed=true}
+  if((found.imgKey||found.img)&&(exr.imgKey||exr.img)){
+   delete exr.imgKey;delete exr.img;changed=true;
+  }
  }));
  if(changed){saveExerciseLibrary(lib);jset(KEYS.workouts,w)}
  return lib;
@@ -2030,9 +2049,9 @@ function progressSummary(exr){
 }
 
 async function exerciseImageMap(w){
- const map={};
+ const map={},lib=exerciseLibrary();
  const all=[];(w||[]).forEach(day=>(day.ex||[]).forEach(e=>all.push(e)));
- await Promise.all(all.map(async e=>{map[exerciseKey(e)]=await mediaSrc(e.imgKey,e.img)}));
+ await Promise.all(all.map(async e=>{map[exerciseKey(e)]=await exerciseImageSrc(e,lib)}));
  return map;
 }
 function resultCountForLog(log){return (log.setResults||[]).filter(x=>x.completed!==false).length}
@@ -2108,9 +2127,21 @@ function showNewLibraryExerciseForm(){
 }
 async function saveNewLibraryExercise(){
  const name=document.getElementById('libExName')?.value.trim();if(!name){alert('Wpisz nazwę ćwiczenia.');return}
- const item={id:uid('lib'),name,desc:document.getElementById('libExDesc')?.value||'',sets:String(document.getElementById('libExSets')?.value||3),reps:String(document.getElementById('libExReps')?.value||''),seconds:String(document.getElementById('libExSeconds')?.value||''),rest:String(document.getElementById('libExRest')?.value||60),imgKey:''};
- const file=document.getElementById('libExImg')?.files?.[0];if(file){item.imgKey=mediaKey('library',item.id,'img');await putMedia(item.imgKey,await fileToDataURL(file))}
- const lib=exerciseLibrary();lib.push(item);saveExerciseLibrary(lib);setEditorDraft.ex.push(cloneExercise(item));renderSetEditor();
+ const lib=exerciseLibrary();
+ let item=lib.find(x=>normalizeExerciseName(x.name)===normalizeExerciseName(name));
+ const values={name,desc:document.getElementById('libExDesc')?.value||'',sets:String(document.getElementById('libExSets')?.value||3),reps:String(document.getElementById('libExReps')?.value||''),seconds:String(document.getElementById('libExSeconds')?.value||''),rest:String(document.getElementById('libExRest')?.value||60)};
+ if(item)Object.assign(item,values);else{item={id:uid('lib'),...values,imgKey:''};lib.push(item)}
+ const file=document.getElementById('libExImg')?.files?.[0];
+ if(file){
+  if(item.imgKey)await deleteMedia(item.imgKey);
+  item.imgKey=mediaKey('library',item.id,'img');
+  await putMedia(item.imgKey,await fileToDataURL(file));
+  delete item.img;
+ }
+ saveExerciseLibrary(lib);
+ const copy=cloneExercise(item);delete copy.imgKey;delete copy.img;
+ setEditorDraft.ex.push(copy);
+ syncExerciseLibraryFromWorkouts();renderSetEditor();
 }
 function saveSetEditor(){
  if(!setEditorDraft)return;const name=document.getElementById('setEditName')?.value.trim();if(!name){alert('Wpisz nazwę zestawu.');return}
@@ -2131,8 +2162,17 @@ function addExerciseToToday(){showAddExerciseForm(currentWorkoutIndex)}
 async function saveExerciseGlobal(){
  const w=workouts(),di=Number(document.getElementById('edDay')?.value),ei=Number(document.getElementById('edEx')?.value),old=w[di]?.ex?.[ei];if(!old)return;
  const updated={...old,name:document.getElementById('exName')?.value||old.name,desc:document.getElementById('exDesc')?.value||'',sets:String(document.getElementById('exSets')?.value||1),reps:String(document.getElementById('exReps')?.value||''),seconds:String(document.getElementById('exSeconds')?.value||''),rest:String(document.getElementById('exRest')?.value||0)};
- const file=document.getElementById('exImg')?.files?.[0];if(file){if(updated.imgKey)await deleteMedia(updated.imgKey);updated.imgKey=mediaKey('exercise',updated.id||uid('ex'),'img');await putMedia(updated.imgKey,await fileToDataURL(file));delete updated.img}
- w[di].ex[ei]=updated;jset(KEYS.workouts,w);syncExerciseLibraryFromWorkouts();renderWorkouts();
+ const lib=exerciseLibrary();let libraryExercise=findLibraryExerciseFor(updated,lib);
+ if(!libraryExercise){libraryExercise={...JSON.parse(JSON.stringify(updated)),id:uid('lib')};delete libraryExercise.libraryId;lib.push(libraryExercise)}
+ updated.libraryId=libraryExercise.id;
+ const file=document.getElementById('exImg')?.files?.[0];
+ if(file){
+  if(libraryExercise.imgKey)await deleteMedia(libraryExercise.imgKey);
+  libraryExercise.imgKey=mediaKey('library',libraryExercise.id,'img');
+  await putMedia(libraryExercise.imgKey,await fileToDataURL(file));
+  delete libraryExercise.img;delete updated.imgKey;delete updated.img;
+ }
+ saveExerciseLibrary(lib);w[di].ex[ei]=updated;jset(KEYS.workouts,w);syncExerciseLibraryFromWorkouts();renderWorkouts();
 }
 
 async function renderPhotos(){
@@ -2783,14 +2823,15 @@ function formatWorkoutTime(total){
 }
 function setWorkoutText(id,value){const el=document.getElementById(id);if(el)el.textContent=value??''}
 async function updateWorkoutPlayerImage(ex){
- const sourceKey=ex?.imgKey||ex?.img||'';
+ const ref=exerciseImageReference(ex);
+ const sourceKey=ref.token;
  if(sourceKey===workoutPlayerImageKey)return;
  workoutPlayerImageKey=sourceKey;
  const token=++workoutPlayerImageToken;
  const img=document.getElementById('wpImage'),media=document.getElementById('wpMedia');
  if(!sourceKey){if(img)img.removeAttribute('src');media?.classList.add('noImage');return}
  try{
-  const src=await mediaSrc(ex?.imgKey,ex?.img||'');
+  const src=await exerciseImageSrc(ex);
   if(token!==workoutPlayerImageToken)return;
   if(src){if(img)img.src=src;media?.classList.remove('noImage')}else{if(img)img.removeAttribute('src');media?.classList.add('noImage')}
  }catch{if(token===workoutPlayerImageToken){if(img)img.removeAttribute('src');media?.classList.add('noImage')}}
