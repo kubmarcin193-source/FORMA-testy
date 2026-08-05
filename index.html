@@ -563,44 +563,7 @@ function xpFromDate(date){
 function esc(s){return String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]))}
 
 function defaultWorkouts(){
- return [
-  {id:"w1",day:1,name:"Dzień 1 — brzuch + góra",notes:"30 min. Pełne ciało z naciskiem na brzuch.",ex:[
-   ex("Pompki","3",10,"",60,"Klatka, barki, triceps. Plecy prosto, brzuch napięty."),
-   ex("Ramiona na gumach oporowych","3",12,"",45,"Uginanie i wyciskanie gum. Kontroluj ruch."),
-   ex("Reverse crunches","3",12,"",45,"Unoszenie miednicy, nie szarp nogami."),
-   ex("Flutter kicks","3","",30,45,"Nogi nisko, lędźwie dociśnięte."),
-   ex("Plank","3","",30,60,"Brzuch i pośladki napięte."),
-   ex("Wiosłowanie gumą oporową","3",12,"",45,"Łopatki prowadź do kręgosłupa, barki trzymaj nisko. Ruch spokojny, bez szarpania."),
-   ex("Face pull z gumą","3",12,"",45,"Przyciągaj gumę w stronę twarzy, łokcie szeroko. Wzmacnia górne plecy i tył barków.")
-  ]},
-  {id:"w2",day:2,name:"Dzień 2 — core + miednica",notes:"Ćwiczenia wspierające core, biodra i dno miednicy.",ex:[
-   ex("Glute bridge","4",15,"",45,"Pośladki mocno napnij na górze. Pomaga aktywować miednicę."),
-   ex("Dead bug","3",10,"",45,"Powoli, bez odrywania lędźwi."),
-   ex("Side plank","3","",25,45,"Na każdą stronę."),
-   ex("Kegle / dno miednicy","4",10,"",30,"Napnij mięśnie jak przy zatrzymaniu moczu na 3–5 s, potem rozluźnij."),
-   ex("Reverse Kegle / rozluźnienie dna miednicy","3","",45,30,"Spokojny oddech przeponowy i świadome rozluźnienie miednicy."),
-   ex("Bird dog","3",10,"",45,"Naprzemiennie wyprostuj przeciwną rękę i nogę. Miednica nieruchomo, kręgosłup neutralnie."),
-   ex("Ściąganie gumy prostymi ramionami","3",12,"",45,"Ściągaj gumę z góry do bioder bez zginania łokci. Pracują najszersze grzbietu.")
-  ]},
-  {id:"w3",day:3,name:"Dzień 3 — brzuch mocniej",notes:"Brzuch, skośne, stabilizacja.",ex:[
-   ex("V crunch","3",12,"",45,"Ręce i nogi idą do siebie, brzuch pracuje."),
-   ex("Heel touch","3",20,"",45,"Praca skośnych brzucha."),
-   ex("Russian twist","3",20,"",45,"Tułów lekko odchylony, kontrolowany skręt."),
-   ex("X-man crunch","3",10,"",45,"Naprzemiennie po skosie."),
-   ex("Plank","3","",40,60,"Progres czasu."),
-   ex("Rozpiętki odwrotne z gumą","3",12,"",45,"Rozciągaj gumę na wysokości klatki, łopatki zbliżaj do siebie. Nie unoś barków."),
-   ex("Reverse snow angel","3",10,"",45,"Leżąc na brzuchu prowadź ręce łukiem od bioder nad głowę. Mały, kontrolowany zakres.")
-  ]},
-  {id:"w4",day:4,name:"Dzień 4 — pełne ciało + ukrwienie",notes:"Nogi, core, biodra. Bez ryzykownych ćwiczeń.",ex:[
-   ex("Przysiady","4",15,"",60,"Pełne stopy na podłodze, kolana stabilnie."),
-   ex("Wykroki","3",10,"",60,"Na każdą nogę."),
-   ex("Hip thrust / glute bridge","4",15,"",45,"Mocna praca pośladków i miednicy."),
-   ex("Bird dog","3",10,"",45,"Stabilizacja kręgosłupa."),
-   ex("Oddech przeponowy + rozluźnienie miednicy","3","",60,30,"Poprawa kontroli napięcia i rozluźnienia."),
-   ex("Good morning z gumą","3",12,"",60,"Zawias biodrowy: cofaj biodra, plecy neutralne, kolana lekko ugięte. Bez bólu lędźwi."),
-   ex("Wiosłowanie jednorącz gumą","3",12,"",45,"Na każdą stronę. Łokieć prowadź przy tułowiu, nie skręcaj miednicy.")
-  ]}
- ];
+ return [];
 }
 function ex(name,sets,reps,seconds,rest,desc){return{id:String(Date.now()+Math.random()),name,sets,reps,seconds,rest,desc,img:""}}
 
@@ -1692,7 +1655,7 @@ function render(){
 }
 /* ===== FORMA PRO v12: kopie, migracje, progres, biblioteka, zdjęcia i kalendarz ===== */
 const APP_DATA_VERSION=16;
-const APP_RELEASE="18.0.0";
+const APP_RELEASE="18.2.0";
 const BACKUP_FORMAT_VERSION=4;
 const EXERCISE_BACKUP_VERSION=1;
 const AUTO_BACKUP_DB="forma_pro_auto_backup_db_v1";
@@ -2025,9 +1988,10 @@ async function runAppMigrations(){
  AUTO_BACKUP_SUSPENDED=true;
  try{
   normalizeWorkoutIds();
-  ensureBackExercises();
-  ensureV12WorkoutExercises();
-  ensureBenchBandWorkoutPack();
+  /* Czysta dystrybucja: nie dodawaj automatycznie żadnych zestawów ani ćwiczeń. */
+  directSet(KEYS.backExerciseUpgrade,"1");
+  directSet(KEYS.workoutUpgradeV12,"1");
+  directSet(KEYS.benchBandUpgrade,"1");
   await migrateInlineMedia();
   migrateLegacyCalendarPlans();
   directSet(KEYS.appDataVersion,String(APP_DATA_VERSION));
@@ -3258,6 +3222,146 @@ finishWorkout=window.finishWorkout=function finishWorkoutV18Final(){stopWorkoutE
 finishWorkoutFromPlayer=window.finishWorkoutFromPlayer=function finishWorkoutFromPlayerV18(){if(confirm('Zakończyć trening i zapisać go w historii?'))finishWorkout()};
 
 Object.assign(window,{exerciseTargetForSet,updateWorkoutPlayer,ensureWorkoutPlayer,startWorkout,startTimer,startRest,completeSetCircuit,nextCircuitStep,previousWorkoutStep,toggleWorkoutTimer,setWorkoutStepPosition,restoreWorkoutState,resumeWorkoutFromSaved,exitWorkoutPlayer,abandonWorkoutSession,finishWorkout,finishWorkoutFromPlayer,recordCurrentSet,workoutStateSave});
+</script>
+
+
+<script>
+/* ===== Forma PRO v18.1 — sygnały dźwiękowe i nieprzerwany Timer treningu ===== */
+let workoutAudioContext=null;
+let workoutCountdownInitial=0;
+let workoutAudioLastSecond=null;
+let workoutAudioEndPlayed=false;
+
+function ensureWorkoutAudio(){
+ try{
+  const AudioCtx=window.AudioContext||window.webkitAudioContext;
+  if(!AudioCtx)return null;
+  if(!workoutAudioContext)workoutAudioContext=new AudioCtx();
+  if(workoutAudioContext.state==='suspended')workoutAudioContext.resume().catch(()=>{});
+  return workoutAudioContext;
+ }catch(error){console.warn('Dźwięk treningu niedostępny:',error);return null}
+}
+function primeWorkoutAudio(){
+ const ctx=ensureWorkoutAudio();
+ if(!ctx)return false;
+ try{
+  const osc=ctx.createOscillator(),gain=ctx.createGain();
+  gain.gain.setValueAtTime(0.0001,ctx.currentTime);
+  osc.connect(gain);gain.connect(ctx.destination);osc.start(ctx.currentTime);osc.stop(ctx.currentTime+0.015);
+  return true;
+ }catch{return false}
+}
+function playWorkoutTone(duration=0.11,frequency=880,volume=0.13,type='sine'){
+ const ctx=ensureWorkoutAudio();if(!ctx)return;
+ try{
+  const now=ctx.currentTime,osc=ctx.createOscillator(),gain=ctx.createGain();
+  osc.type=type;osc.frequency.setValueAtTime(frequency,now);
+  gain.gain.setValueAtTime(0.0001,now);
+  gain.gain.exponentialRampToValueAtTime(Math.max(0.001,volume),now+0.015);
+  gain.gain.setValueAtTime(Math.max(0.001,volume),Math.max(now+0.016,now+duration-0.04));
+  gain.gain.exponentialRampToValueAtTime(0.0001,now+duration);
+  osc.connect(gain);gain.connect(ctx.destination);osc.start(now);osc.stop(now+duration+0.03);
+ }catch(error){console.warn('Nie udało się odtworzyć sygnału:',error)}
+}
+function workoutCountdownBeep(second){
+ const isFinal=second<=3;
+ const frequency=isFinal?1080:(mode==='rest'?720:860);
+ playWorkoutTone(isFinal?0.12:0.09,frequency,isFinal?0.16:0.11,isFinal?'square':'sine');
+ if(isFinal){try{navigator.vibrate?.(55)}catch{}}
+}
+function workoutCountdownFinishedSound(){
+ playWorkoutTone(2,mode==='rest'?760:920,0.15,'sine');
+ try{navigator.vibrate?.([180,90,180,90,350])}catch{}
+}
+function announceWorkoutCountdown(second){
+ const remaining=Math.max(0,Number(second)||0);
+ if(remaining===workoutAudioLastSecond)return;
+ workoutAudioLastSecond=remaining;
+ if(remaining<=0){
+  if(!workoutAudioEndPlayed){workoutAudioEndPlayed=true;workoutCountdownFinishedSound()}
+  return;
+ }
+ if(remaining>=workoutCountdownInitial)return;
+ if(remaining<=3||remaining%10===0)workoutCountdownBeep(remaining);
+}
+function resetWorkoutCountdownAudio(initial){
+ workoutCountdownInitial=Math.max(0,Number(initial)||0);
+ workoutAudioLastSecond=null;
+ workoutAudioEndPlayed=false;
+}
+
+/* Timer całego treningu liczy czas rzeczywisty od Start do Zakończ — także podczas pauzy. */
+workoutElapsedSeconds=window.workoutElapsedSeconds=function workoutElapsedSecondsV181(){
+ const start=Date.parse(activeWorkoutSession?.startedAt||'');
+ if(!Number.isFinite(start))return 0;
+ return Math.max(0,Math.floor((Date.now()-start)/1000));
+};
+
+pauseWorkoutSessionClock=window.pauseWorkoutSessionClock=function pauseWorkoutSessionClockV181(){
+ if(workoutSessionPaused)return;
+ if(workoutTimerRunning&&workoutTimerEndsAt)timerLeft=Math.max(0,Math.ceil((workoutTimerEndsAt-Date.now())/1000));
+ stopWorkoutTimer();
+ workoutSessionPaused=true;
+ /* Nie zapisujemy pauzy do Timera całego treningu. */
+ if(activeWorkoutSession){activeWorkoutSession.pausedAt=null;activeWorkoutSession.totalPausedMs=0}
+ workoutStateSave();updateWorkoutPlayer();
+};
+resumeWorkoutSessionClock=window.resumeWorkoutSessionClock=function resumeWorkoutSessionClockV181(){
+ if(!workoutSessionPaused)return;
+ workoutSessionPaused=false;
+ if(activeWorkoutSession){activeWorkoutSession.pausedAt=null;activeWorkoutSession.totalPausedMs=0}
+ primeWorkoutAudio();
+ if(timerLeft>0)startTimer();else updateWorkoutPlayer();
+ workoutStateSave();
+};
+
+startTimer=window.startTimer=function startTimerV181(){
+ clearInterval(timerId);
+ if(workoutSessionPaused||Number(timerLeft||0)<=0){workoutTimerRunning=false;workoutTimerEndsAt=0;updateWorkoutPlayer();return}
+ primeWorkoutAudio();
+ resetWorkoutCountdownAudio(timerLeft);
+ workoutTimerRunning=true;
+ workoutTimerEndsAt=Date.now()+Number(timerLeft)*1000;
+ const tick=()=>{
+  if(!workoutTimerRunning||workoutSessionPaused)return;
+  timerLeft=Math.max(0,Math.ceil((workoutTimerEndsAt-Date.now())/1000));
+  announceWorkoutCountdown(timerLeft);
+  updateWorkoutPlayer();
+  if(timerLeft<=0){
+   clearInterval(timerId);timerId=null;workoutTimerRunning=false;workoutTimerEndsAt=0;
+   updateWorkoutPlayer();
+   if(mode==='rest')setTimeout(()=>nextCircuitStep(),2050);
+  }
+ };
+ tick();timerId=setInterval(tick,250);
+};
+
+const formaV181BaseUpdateWorkoutPlayer=updateWorkoutPlayer;
+updateWorkoutPlayer=window.updateWorkoutPlayer=function updateWorkoutPlayerV181(){
+ formaV181BaseUpdateWorkoutPlayer();
+ const caption=document.getElementById('wpTimerCaption');
+ if(caption&&workoutSessionPaused)caption.textContent=(caption.textContent?caption.textContent+' • ':'')+'Timer treningu nadal działa';
+ const status=document.querySelector('#workoutPlayer .workoutPlayerStatus');
+ if(status&&!document.getElementById('wpAudioStatus')){
+  const audio=document.createElement('span');audio.id='wpAudioStatus';audio.textContent=(window.AudioContext||window.webkitAudioContext)?'🔊 Sygnały czasu aktywne':'⚠ Dźwięk niedostępny';
+  audio.className=(window.AudioContext||window.webkitAudioContext)?'okStatus':'warnStatus';status.prepend(audio);
+ }
+};
+
+const formaV181BaseStartWorkout=startWorkout;
+startWorkout=window.startWorkout=function startWorkoutV181(){primeWorkoutAudio();return formaV181BaseStartWorkout()};
+const formaV181BaseResumeWorkout=resumeWorkoutFromSaved;
+resumeWorkoutFromSaved=window.resumeWorkoutFromSaved=function resumeWorkoutFromSavedV181(){primeWorkoutAudio();return formaV181BaseResumeWorkout()};
+
+/* Zamknięcie widoku może wstrzymać odliczanie kroku, ale Timer treningu nadal wynika z startedAt. */
+const formaV181BaseRestoreWorkoutState=restoreWorkoutState;
+restoreWorkoutState=window.restoreWorkoutState=function restoreWorkoutStateV181(state){
+ const out=formaV181BaseRestoreWorkoutState(state);
+ if(activeWorkoutSession){activeWorkoutSession.pausedAt=null;activeWorkoutSession.totalPausedMs=0}
+ return out;
+};
+
+Object.assign(window,{ensureWorkoutAudio,primeWorkoutAudio,playWorkoutTone,workoutElapsedSeconds,pauseWorkoutSessionClock,resumeWorkoutSessionClock,startTimer,updateWorkoutPlayer,startWorkout,resumeWorkoutFromSaved,restoreWorkoutState});
 </script>
 </body>
 </html>

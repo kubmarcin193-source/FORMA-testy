@@ -1,15 +1,11 @@
-Forma PRO PWA v18.0
+Forma PRO PWA v18.2 — wersja bez wbudowanych ćwiczeń
 Data: 2026-08-05
 
 Najważniejsze zmiany:
-- pierwsze logowanie wymaga ustalonego hasła właściciela; nie ma ekranu tworzenia nowego hasła
-- jawne hasło nie występuje w plikach aplikacji; lokalna weryfikacja używa PBKDF2
-- telefon może zostać zapamiętany po pierwszym poprawnym logowaniu
-- niewykonane plany po terminie znikają z dnia i podsumowania tygodnia
-- usunięto zakładkę Posiłki
-- odświeżono wygląd aplikacji
-- cele serii maleją stopniowo: ostatnia seria ma około 50% wartości pierwszej
-- stała kolejność przycisków: Poprzednie, Pauza/Wznów, Seria wykonana, Następne, Zakończ
-- odpoczynek pokazuje następne ćwiczenie, zdjęcie i cel
-- pole Odpoczynek zastąpiono Timerem czasu całego treningu
-- przerwa między ćwiczeniami: 20 s; między seriami obwodu: 60 s; po ostatnim kroku: 0 s
+- aplikacja nie zawiera startowych zestawów ani biblioteki ćwiczeń
+- gotowy plik ćwiczeń można zaimportować w trybie „Zastąp tylko zakładkę Ćwiczenia”
+- liczba powtórzeń i czas automatycznie zmniejszają się z każdą serią
+- 20 sekund odpoczynku między ćwiczeniami i 60 sekund między seriami
+- dźwięki odliczania oraz nieprzerwany Timer całego treningu
+
+Uwaga: podmiana plików na tej samej domenie nie usuwa danych zapisanych wcześniej w pamięci przeglądarki. Aby wgrać swoje gotowe zestawy bez dublowania, wybierz import ćwiczeń w trybie „Zastąp tylko zakładkę Ćwiczenia”.
