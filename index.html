@@ -172,6 +172,39 @@ body.workout-player-open{overflow:hidden;overscroll-behavior:none}
 @media(max-width:800px){
  .workoutPlayerTop{min-height:62px;padding:9px 10px}.workoutPlayerTop strong{font-size:15px}.workoutPlayerContent{grid-template-columns:1fr;align-content:start;gap:10px;padding:10px}.workoutPlayerMedia{height:min(34vh,310px);min-height:180px;border-radius:16px}.workoutPlayerInfo h1{font-size:clamp(28px,9vw,44px);margin:10px 0 6px}.workoutPlayerDescription{font-size:16px;line-height:1.35;margin-bottom:8px}.workoutMetrics{grid-template-columns:repeat(4,minmax(70px,1fr));gap:6px}.workoutMetric{padding:8px;border-radius:12px}.workoutMetric b{font-size:17px}.workoutMetric small{font-size:10px}.workoutPlayerTimer{font-size:clamp(54px,19vw,92px);margin:8px 0 2px}.workoutPlayerControls{grid-template-columns:repeat(2,1fr);padding:8px 9px calc(9px + env(safe-area-inset-bottom));gap:7px}.workoutPlayerControls button{min-height:48px;padding:9px 8px}.workoutPlayerControls .finishWorkoutButton{grid-column:1/-1}.workoutPlayer.timerless #wpNextButton{grid-column:1/-1}.workoutPlayerStatus{font-size:10px;gap:8px}}
 @media(max-width:800px) and (orientation:landscape){.workoutPlayerContent{grid-template-columns:minmax(240px,.9fr) minmax(290px,1.1fr);align-items:center}.workoutPlayerMedia{height:calc(100vh - 190px);min-height:190px}.workoutPlayerInfo h1{font-size:30px}.workoutPlayerDescription{font-size:14px;max-height:62px;overflow:auto}.workoutMetrics{grid-template-columns:repeat(4,1fr)}.workoutPlayerTimer{font-size:58px;margin:4px}.workoutPlayerControls{grid-template-columns:repeat(5,1fr)}.workoutPlayerControls .finishWorkoutButton{grid-column:auto}}
+
+
+/* ===== Forma PRO v18 — odświeżony interfejs ===== */
+:root{--surface-glass:rgba(15,23,42,.78);--shadow:0 18px 50px rgba(0,0,0,.34)}
+html{scroll-behavior:smooth;color-scheme:dark}
+body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:
+ radial-gradient(circle at 15% -10%,rgba(56,189,248,.24),transparent 32%),
+ radial-gradient(circle at 90% 5%,rgba(167,139,250,.16),transparent 28%),#020617;min-height:100vh}
+header{padding:14px clamp(14px,3vw,28px);background:rgba(2,6,23,.82);border-bottom:1px solid rgba(148,163,184,.2);box-shadow:0 10px 35px rgba(0,0,0,.25)}
+header h1{font-size:clamp(22px,4vw,30px);letter-spacing:-.035em}
+header small{font-size:12px;letter-spacing:.035em}
+main{max-width:1240px;padding:10px clamp(10px,2.5vw,24px) 90px}
+.tabs{position:sticky;top:74px;z-index:8;padding:10px 2px;margin:0 -2px;background:linear-gradient(180deg,rgba(2,6,23,.96),rgba(2,6,23,.76),transparent);scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{background:rgba(15,23,42,.86);border-color:rgba(148,163,184,.22);box-shadow:0 6px 18px rgba(0,0,0,.16);transition:transform .16s ease,border-color .16s ease,background .16s ease}
+.tab:hover{transform:translateY(-1px);border-color:rgba(56,189,248,.55)}
+.tab.active{background:linear-gradient(135deg,#38bdf8,#60a5fa);box-shadow:0 8px 24px rgba(56,189,248,.25)}
+.card,.todayHero,.dayFullCard{background:linear-gradient(155deg,rgba(17,24,39,.96),rgba(8,15,30,.93));border-color:rgba(148,163,184,.2);box-shadow:var(--shadow);backdrop-filter:blur(14px)}
+.card{border-radius:22px;padding:clamp(14px,2.2vw,20px)}
+.stat,.daySummaryBox,.workoutMetric{background:linear-gradient(145deg,rgba(30,41,59,.9),rgba(15,23,42,.9));border-color:rgba(148,163,184,.18)}
+button{min-height:44px;transition:transform .14s ease,filter .14s ease,box-shadow .14s ease}
+button:hover{filter:brightness(1.08);transform:translateY(-1px)}
+button:active{transform:translateY(0) scale(.985)}
+button:disabled{opacity:.42;cursor:not-allowed;transform:none;filter:none}
+input,textarea,select{background:rgba(2,6,23,.78);border-color:rgba(148,163,184,.28);outline:none;transition:border-color .15s,box-shadow .15s}
+input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(56,189,248,.15)}
+.workoutPlayerControls{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+.workoutPlayerControls button{min-width:0!important;margin:0!important;white-space:normal;line-height:1.15}
+.workoutPlayerControls .finishWorkoutButton{grid-column:auto!important}
+.workoutPlayer.timerless #wpNextButton{grid-column:auto!important}
+.workoutPreviewNote{margin:0 0 10px;padding:10px 12px;border-radius:12px;background:rgba(245,158,11,.09);border:1px solid rgba(245,158,11,.26);color:#fde68a;font-weight:800}
+@media(max-width:650px){
+ header{padding:11px 12px}.tabs{top:65px}.card{border-radius:17px}.workoutPlayerControls{gap:4px!important;padding:7px 5px calc(7px + env(safe-area-inset-bottom))!important}.workoutPlayerControls button{font-size:clamp(9px,2.55vw,12px)!important;padding:7px 3px!important;min-height:52px!important;border-radius:9px!important}.workoutPlayerStatus{font-size:9px!important}}
 </style>
 </head>
 <body class="auth-locked">
@@ -212,7 +245,6 @@ body.workout-player-open{overflow:hidden;overscroll-behavior:none}
     <button class="tab" onclick="show('charts',this)">Wykresy</button>
     <button class="tab" onclick="show('achievements',this)">Osiągnięcia</button>
     <button class="tab" onclick="show('settings',this)">Cele</button>
-    <button class="tab" onclick="show('meals',this)">Posiłki</button>
   </div>
 
   <section id="dashboard" class="view"></section>
@@ -226,7 +258,6 @@ body.workout-player-open{overflow:hidden;overscroll-behavior:none}
   <section id="achievements" class="view hidden"></section>
   <section id="settings" class="view hidden"></section>
   <section id="products" class="view hidden" style="display:none!important"></section>
-  <section id="meals" class="view hidden"></section>
 </main>
 
 <script>
@@ -466,21 +497,19 @@ function completeRecurringTask(type,date,alwaysSchedule=false){
 }
 function addWeeklyReminder(type,fromDate){setPlanForDate(type,addDaysIso(fromDate,7),true)}
 function cleanupExpiredPlans(){
- let c=calData(),today=iso(),changed=false,carry=planCarry(),carryChanged=false;
- const currentWeek=iso(mondayOf(today));
- Object.keys(carry).forEach(type=>{if(carry[type]!==currentWeek){delete carry[type];carryChanged=true}});
+ let c=calData(),today=iso(),changed=false;
  Object.entries(PLAN_FIELDS).forEach(([type,field])=>{
-  const dates=Object.keys(c).filter(d=>c[d]?.[field]).sort();
-  const missed=dates.find(d=>d<today&&!actualForPlanType(type,d));
-  if(missed){
-   if(iso(mondayOf(missed))===currentWeek){carry[type]=currentWeek;carryChanged=true}
-   Object.keys(c).forEach(d=>{if(d>=missed&&c[d]?.[field]){delete c[d][field];changed=true}});
-  }
-  const remaining=Object.keys(c).filter(d=>c[d]?.[field]&&d>=today).sort();
-  remaining.slice(1).forEach(d=>{delete c[d][field];changed=true});
+  Object.keys(c).forEach(date=>{
+   if(date<today&&c[date]?.[field]&&!actualForPlanType(type,date)){
+    delete c[date][field];changed=true;
+   }
+  });
+  const future=Object.keys(c).filter(date=>date>=today&&c[date]?.[field]).sort();
+  future.slice(1).forEach(date=>{delete c[date][field];changed=true});
  });
  if(changed)jset(KEYS.calendar,pruneEmptyCalendar(c));
- if(carryChanged)jset(KEYS.calendarPlanCarry,carry);
+ const carry=planCarry();
+ if(Object.keys(carry).length)jset(KEYS.calendarPlanCarry,{});
 }
 function migrateLegacyCalendarPlans(){
  if(localStorage.getItem(KEYS.calendarPlanVersion)==="2"){cleanupExpiredPlans();return}
@@ -1390,7 +1419,7 @@ async function exportAll(){
   data:data(),
   settings:settings(),
   body:bodyData(),
-  meals:meals(),
+  
   photos:photos(),
   protein:proteinData(), // kompatybilność starych backupów
   products:products(),   // kompatybilność starych backupów
@@ -1657,14 +1686,13 @@ function render(){
   ["private",renderPrivate],
   ["charts",renderCharts],
   ["achievements",renderAchievements],
-  ["settings",renderSettings],
-  ["meals",renderMeals]
+  ["settings",renderSettings]
  ];
  jobs.forEach(([name,fn])=>{try{fn()}catch(e){console.error("Błąd render():",name,e)}});
 }
 /* ===== FORMA PRO v12: kopie, migracje, progres, biblioteka, zdjęcia i kalendarz ===== */
-const APP_DATA_VERSION=15;
-const APP_RELEASE="17.3.0";
+const APP_DATA_VERSION=16;
+const APP_RELEASE="18.0.0";
 const BACKUP_FORMAT_VERSION=4;
 const EXERCISE_BACKUP_VERSION=1;
 const AUTO_BACKUP_DB="forma_pro_auto_backup_db_v1";
@@ -1802,7 +1830,7 @@ function simpleHash(text){
 }
 function coreBackupSignature(){
  const core={
-  data:data(),settings:settings(),body:bodyData(),meals:meals(),photos:photos(),calendar:calData(),
+  data:data(),settings:settings(),body:bodyData(),photos:photos(),calendar:calData(),
   workouts:workouts(),privateData:privData(),privatePhotos:privPhotos(),workoutLog:workoutLog(),
   exerciseLibrary:exerciseLibrary(),calendarVisibility:calendarVisibility(),privatePass:localStorage.getItem(KEYS.privatePass)||""
  };
@@ -2282,7 +2310,7 @@ function collectMediaKeysFromBackup(pack){
  const keys=new Set();(pack.photos||[]).forEach(p=>['frontKey','sideKey','backKey'].forEach(k=>{if(p[k])keys.add(p[k])}));(pack.privatePhotos||[]).forEach(p=>{if(p.imgKey)keys.add(p.imgKey)});(pack.workouts||[]).forEach(day=>(day.ex||[]).forEach(e=>{if(e.imgKey)keys.add(e.imgKey)}));(pack.exerciseLibrary||[]).forEach(e=>{if(e.imgKey)keys.add(e.imgKey)});return [...keys];
 }
 async function buildFullBackupPackage(){
- const now=new Date(),pack={app:'Forma PRO',type:'FORMA_PRO_FULL_BACKUP',backupVersion:BACKUP_FORMAT_VERSION,schemaVersion:APP_DATA_VERSION,appRelease:APP_RELEASE,exportedAt:now.toISOString(),data:data(),settings:settings(),body:bodyData(),meals:meals(),photos:photos(),protein:proteinData(),products:products(),calendar:calData(),calendarVisibility:calendarVisibility(),workouts:workouts(),exerciseLibrary:exerciseLibrary(),privatePass:localStorage.getItem(KEYS.privatePass)||'',privateData:privData(),privatePhotos:privPhotos(),workoutLog:workoutLog(),media:{}};
+ const now=new Date(),pack={app:'Forma PRO',type:'FORMA_PRO_FULL_BACKUP',backupVersion:BACKUP_FORMAT_VERSION,schemaVersion:APP_DATA_VERSION,appRelease:APP_RELEASE,exportedAt:now.toISOString(),data:data(),settings:settings(),body:bodyData(),photos:photos(),protein:proteinData(),products:products(),calendar:calData(),calendarVisibility:calendarVisibility(),workouts:workouts(),exerciseLibrary:exerciseLibrary(),privatePass:localStorage.getItem(KEYS.privatePass)||'',privateData:privData(),privatePhotos:privPhotos(),workoutLog:workoutLog(),media:{}};
  pack.media=await getAllStoredMedia();for(const key of collectMediaKeysFromBackup(pack)){if(!pack.media[key]){const value=await getMedia(key);if(value)pack.media[key]=value}}
  pack.stats={bodyEntries:pack.body.length,photoSets:pack.photos.length,privatePhotoSets:pack.privatePhotos.length,workoutSets:pack.workouts.length,workoutLog:pack.workoutLog.length,exerciseLibrary:pack.exerciseLibrary.length,savedMediaFiles:Object.keys(pack.media).length};return pack;
 }
@@ -2531,11 +2559,13 @@ Object.assign(window,{setCalendarVisibility,openCalendarIcon,openSetEditor,rende
 
 
 /* ===== Blokada dostępu aplikacji =====
-   Hasło nie jest zapisane w plikach aplikacji.
-   Przy pierwszym uruchomieniu tej instalacji użytkownik ustawia własne hasło.
-   Losowa sól i weryfikator PBKDF2 są tworzone i zapisywane wyłącznie lokalnie w przeglądarce. */
+   Pierwsze uruchomienie wymaga ustalonego hasła właściciela.
+   Jawne hasło nie jest zapisane w plikach. Statyczna aplikacja zawiera wyłącznie
+   sól i weryfikator PBKDF2 potrzebny do lokalnego sprawdzenia hasła. */
 const APP_AUTH_CONFIG_KEY="forma_pro_auth_config_v2";
 const APP_AUTH_PBKDF2_ITERATIONS=310000;
+const APP_AUTH_FIXED_SALT="WpJ/Jl8o6+dM9+g6sifA/Q==";
+const APP_AUTH_FIXED_VERIFIER="DCUGUSIbgPdQd7XuSh6PTWvHr5J12aYbwpQP+eLmAEE=";
 const APP_AUTH_MOBILE_TRUST_KEY="forma_pro_mobile_verified_v2";
 const APP_AUTH_DESKTOP_IDLE_MS=5*60*1000;
 let formaAuthIsPhone=false;
@@ -2561,11 +2591,7 @@ function base64FromBytes(bytes){
  return btoa(raw);
 }
 function getFormaAuthConfig(){
- try{
-  const cfg=JSON.parse(localStorage.getItem(APP_AUTH_CONFIG_KEY)||"null");
-  if(!cfg||typeof cfg!=="object"||!cfg.salt||!cfg.verifier)return null;
-  return {salt:String(cfg.salt),verifier:String(cfg.verifier),iterations:Number(cfg.iterations)||APP_AUTH_PBKDF2_ITERATIONS};
- }catch{return null}
+ return {salt:APP_AUTH_FIXED_SALT,verifier:APP_AUTH_FIXED_VERIFIER,iterations:APP_AUTH_PBKDF2_ITERATIONS,fixed:true};
 }
 function createFormaAuthSalt(){
  if(!window.crypto?.getRandomValues)throw new Error("Ta przeglądarka nie obsługuje bezpiecznego generatora losowego.");
@@ -2602,25 +2628,16 @@ function setFormaAuthScreen(reason=""){
  const input=document.getElementById("appAuthPassword");
  const confirm=document.getElementById("appAuthPasswordConfirm");
  const button=document.getElementById("appAuthButton");
- const configured=!!getFormaAuthConfig();
- if(!configured){
-  if(desc)desc.textContent="Ustaw hasło dla tej instalacji aplikacji.";
-  if(rule)rule.textContent="Hasło nie trafi do plików na GitHubie. Losowa sól i weryfikator zostaną zapisane wyłącznie lokalnie w tej przeglądarce. Na innym urządzeniu ustawisz hasło osobno.";
-  confirmWrap?.classList.remove("hidden");
-  if(input){input.autocomplete="new-password";input.placeholder="Ustaw hasło"}
-  if(confirm)confirm.value="";
-  if(button)button.textContent="Ustaw hasło i uruchom";
+ confirmWrap?.classList.add("hidden");
+ if(confirm)confirm.value="";
+ if(input){input.autocomplete="current-password";input.placeholder="Wpisz hasło"}
+ if(button)button.textContent="Odblokuj aplikację";
+ if(formaAuthIsPhone){
+  if(desc)desc.textContent="Pierwsze uruchomienie na tym telefonie wymaga Twojego hasła.";
+  if(rule)rule.textContent="Po poprawnym zalogowaniu telefon zostanie zapamiętany. Hasło nie będzie wymagane przy kolejnych uruchomieniach na tym urządzeniu.";
  }else{
-  confirmWrap?.classList.add("hidden");
-  if(input){input.autocomplete="current-password";input.placeholder="Wpisz hasło"}
-  if(button)button.textContent="Odblokuj aplikację";
-  if(formaAuthIsPhone){
-   if(desc)desc.textContent="Pierwsze uruchomienie na tym telefonie wymaga potwierdzenia lokalnym hasłem.";
-   if(rule)rule.textContent="Po poprawnym zalogowaniu ten telefon zostanie zapamiętany i przy kolejnych uruchomieniach hasło nie będzie wymagane.";
-  }else{
-   if(desc)desc.textContent=reason||"Wprowadź lokalne hasło, aby uruchomić aplikację na komputerze.";
-   if(rule)rule.textContent="Na komputerze hasło jest wymagane przy każdym ponownym uruchomieniu. Po 5 minutach bezczynności aplikacja zostanie automatycznie zablokowana.";
-  }
+  if(desc)desc.textContent=reason||"Wprowadź swoje hasło, aby uruchomić aplikację.";
+  if(rule)rule.textContent="Na komputerze hasło jest wymagane przy każdym uruchomieniu. Po 5 minutach bezczynności aplikacja zostanie automatycznie zablokowana.";
  }
  requestAnimationFrame(()=>input?.focus());
 }
@@ -2683,25 +2700,12 @@ async function unlockFormaPro(rememberPhone=false){
 async function authenticateFormaPro(event){
  event?.preventDefault();
  const input=document.getElementById("appAuthPassword");
- const confirm=document.getElementById("appAuthPasswordConfirm");
  const button=document.getElementById("appAuthButton");
  const value=input?.value||"";
  const cfg=getFormaAuthConfig();
- if(!value){setFormaAuthMessage(cfg?"Wpisz hasło.":"Ustaw hasło.","error");input?.focus();return false}
+ if(!value){setFormaAuthMessage("Wpisz hasło.","error");input?.focus();return false}
  if(button)button.disabled=true;
  try{
-  if(!cfg){
-   if(value.length<6){setFormaAuthMessage("Hasło musi mieć co najmniej 6 znaków.","error");input?.focus();return false}
-   if(value!==(confirm?.value||"")){setFormaAuthMessage("Hasła nie są identyczne.","error");if(confirm){confirm.value="";confirm.focus()}return false}
-   const salt=createFormaAuthSalt();
-   const verifier=await deriveFormaPasswordVerifier(value,salt,APP_AUTH_PBKDF2_ITERATIONS);
-   localStorage.setItem(APP_AUTH_CONFIG_KEY,JSON.stringify({version:2,salt,verifier,iterations:APP_AUTH_PBKDF2_ITERATIONS,createdAt:new Date().toISOString()}));
-   if(input)input.value="";
-   if(confirm)confirm.value="";
-   setFormaAuthMessage("Hasło zapisano lokalnie.","ok");
-   await unlockFormaPro(formaAuthIsPhone);
-   return true;
-  }
   const digest=await deriveFormaPasswordVerifier(value,cfg.salt,cfg.iterations);
   if(!secureVerifierEqual(digest,cfg.verifier)){
    setFormaAuthMessage("Nieprawidłowe hasło.","error");
@@ -2714,7 +2718,7 @@ async function authenticateFormaPro(event){
   return true;
  }catch(error){
   console.error("Błąd zabezpieczenia aplikacji:",error);
-  setFormaAuthMessage("Nie udało się skonfigurować zabezpieczenia w tej przeglądarce.","error");
+  setFormaAuthMessage("Nie udało się sprawdzić hasła w tej przeglądarce.","error");
   return false;
  }finally{if(button)button.disabled=false}
 }
@@ -3096,6 +3100,164 @@ if(!workoutPlayerListenersReady){
  window.addEventListener('beforeunload',workoutStateSave);
 }
 Object.assign(window,{startWorkout,startTimer,startRest,completeSetCircuit,nextCircuitStep,previousWorkoutStep,toggleWorkoutTimer,toggleWorkoutFullscreen,exitWorkoutPlayer,resumeWorkoutFromSaved,abandonWorkoutSession,finishWorkout,finishWorkoutFromPlayer,renderWorkouts,isWorkoutPlayerActive});
+</script>
+
+<script>
+/* ===== Forma PRO v18 — stabilny tryb treningowy ===== */
+const FORMA_EXERCISE_REST_SECONDS=20;
+const FORMA_SERIES_REST_SECONDS=60;
+let workoutSessionPaused=false;
+let workoutElapsedHeartbeat=null;
+
+function formaSeriesFactor(setNo,totalSets){
+ const total=Math.max(1,Number(totalSets)||1),set=Math.max(1,Math.min(total,Number(setNo)||1));
+ return total<=1?1:1-(0.5*(set-1)/(total-1));
+}
+function formaRoundTime(value){
+ const n=Math.max(0,Number(value)||0);if(!n)return 0;
+ return Math.max(5,Math.round(n/5)*5);
+}
+function exerciseTargetForSet(exr,setNo){
+ const sets=Math.max(1,Number(exr?.sets||1)),factor=formaSeriesFactor(setNo,sets);
+ const suggested=typeof exerciseSuggestion==='function'?exerciseSuggestion(exr):{};
+ const baseReps=Number(exr?.reps||suggested.reps||0),baseSeconds=Number(exr?.seconds||suggested.seconds||0);
+ return {
+  reps:baseReps?Math.max(1,Math.round(baseReps*factor)):'',
+  seconds:baseSeconds?formaRoundTime(baseSeconds*factor):'',
+  load:suggested.load||'',factor
+ };
+}
+function workoutElapsedSeconds(){
+ const start=Date.parse(activeWorkoutSession?.startedAt||'');if(!Number.isFinite(start))return 0;
+ const pausedMs=Math.max(0,Number(activeWorkoutSession?.totalPausedMs||0));
+ const end=workoutSessionPaused?Date.parse(activeWorkoutSession?.pausedAt||'')||Date.now():Date.now();
+ return Math.max(0,Math.floor((end-start-pausedMs)/1000));
+}
+function updateWorkoutElapsedDisplay(){setWorkoutText('wpElapsed',formatWorkoutTime(workoutElapsedSeconds()))}
+function startWorkoutElapsedHeartbeat(){
+ clearInterval(workoutElapsedHeartbeat);updateWorkoutElapsedDisplay();
+ workoutElapsedHeartbeat=setInterval(updateWorkoutElapsedDisplay,1000);
+}
+function stopWorkoutElapsedHeartbeat(){clearInterval(workoutElapsedHeartbeat);workoutElapsedHeartbeat=null}
+function pauseWorkoutSessionClock(){
+ if(workoutSessionPaused)return;
+ if(workoutTimerRunning&&workoutTimerEndsAt)timerLeft=Math.max(0,Math.ceil((workoutTimerEndsAt-Date.now())/1000));
+ stopWorkoutTimer();workoutSessionPaused=true;activeWorkoutSession.pausedAt=new Date().toISOString();
+ workoutStateSave();updateWorkoutPlayer();
+}
+function resumeWorkoutSessionClock(){
+ if(!workoutSessionPaused)return;
+ const pausedAt=Date.parse(activeWorkoutSession?.pausedAt||'');
+ if(Number.isFinite(pausedAt))activeWorkoutSession.totalPausedMs=Math.max(0,Number(activeWorkoutSession.totalPausedMs||0))+(Date.now()-pausedAt);
+ activeWorkoutSession.pausedAt=null;workoutSessionPaused=false;
+ if(timerLeft>0)startTimer();else updateWorkoutPlayer();
+ workoutStateSave();
+}
+function workoutRestDurationAfterCurrent(){
+ const steps=circuitSteps(),pos=currentStepIndex(),cur=steps[pos],next=steps[pos+1];
+ if(!cur||!next)return 0;
+ return Number(next.set)!==Number(cur.set)?FORMA_SERIES_REST_SECONDS:FORMA_EXERCISE_REST_SECONDS;
+}
+
+recordCurrentSet=window.recordCurrentSet=function recordCurrentSetV18(completed=true){
+ const exr=todayWorkout()?.ex?.[currentExerciseIndex];if(!exr)return;
+ const target=exerciseTargetForSet(exr,currentSet);
+ const useInputs=!workoutSessionActive;
+ const result={
+  exerciseId:exr.id||'',libraryId:exr.libraryId||'',exerciseName:exr.name||'Ćwiczenie',set:Number(currentSet||1),
+  reps:Number(useInputs?document.getElementById('activeReps')?.value:target.reps)||target.reps||'',
+  seconds:Number(useInputs?document.getElementById('activeSeconds')?.value:target.seconds)||target.seconds||'',
+  load:String((useInputs?document.getElementById('activeLoad')?.value:target.load)||target.load||'').trim(),completed:!!completed
+ };
+ activeWorkoutSession.results[`${exerciseKey(exr)}|${currentSet}`]=result;
+};
+
+workoutStateSave=window.workoutStateSave=function workoutStateSaveV18(){
+ if(!workoutSessionActive)return;
+ const set=todayWorkout();
+ const state={version:2,active:true,updatedAt:new Date().toISOString(),workoutIndex:currentWorkoutIndex,workoutId:set?.id||'',workoutName:set?.name||'Trening',exerciseIndex:currentExerciseIndex,set:currentSet,mode,timerLeft:Number(timerLeft||0),timerRunning:workoutTimerRunning,timerEndsAt:Number(workoutTimerEndsAt||0),sessionPaused:workoutSessionPaused,date:workoutCurrentDate(),note:workoutCurrentNote(),partial:workoutCurrentPartial(),activeWorkoutSession:JSON.parse(JSON.stringify(activeWorkoutSession||{startedAt:null,totalPausedMs:0,pausedAt:null,results:{}}))};
+ localStorage.setItem(WORKOUT_SESSION_KEY,JSON.stringify(state));
+};
+
+ensureWorkoutPlayer=window.ensureWorkoutPlayer=function ensureWorkoutPlayerV18(){
+ let player=document.getElementById('workoutPlayer');if(player)return player;
+ player=document.createElement('div');player.id='workoutPlayer';player.className='workoutPlayer';player.setAttribute('role','dialog');player.setAttribute('aria-modal','true');player.setAttribute('aria-label','Tryb treningowy');
+ player.innerHTML=`
+  <div class="workoutPlayerTop"><div><strong id="wpWorkoutName">Trening</strong><small id="wpProgress">Ćwiczenie 1 z 1</small></div><div class="workoutTopActions"><button class="ghost" onclick="toggleWorkoutFullscreen()" title="Pełny ekran">⛶</button><button class="bad" onclick="exitWorkoutPlayer()" title="Wyjdź z widoku">✕</button></div></div>
+  <div class="workoutPlayerContent"><div id="wpMedia" class="workoutPlayerMedia noImage"><img id="wpImage" alt="Zdjęcie ćwiczenia"></div><div class="workoutPlayerInfo"><span id="wpPhase" class="workoutPhase">ĆWICZENIE</span><h1 id="wpExerciseName">Ćwiczenie</h1><div id="wpPreviewNote" class="workoutPreviewNote hidden"></div><p id="wpDescription" class="workoutPlayerDescription"></p><div class="workoutMetrics"><div class="workoutMetric"><small>Seria</small><b id="wpSet">1/1</b></div><div class="workoutMetric"><small>Powtórzenia</small><b id="wpReps">—</b></div><div class="workoutMetric"><small>Czas</small><b id="wpTime">—</b></div><div class="workoutMetric"><small>Timer</small><b id="wpElapsed">00:00</b></div></div><div id="wpTimer" class="workoutPlayerTimer">00:00</div><div id="wpTimerCaption" class="workoutTimerCaption"></div></div></div>
+  <div class="workoutPlayerControls"><button id="wpPreviousButton" class="ghost" onclick="previousWorkoutStep()">← Poprzednie</button><button id="wpPauseButton" class="ghost" onclick="toggleWorkoutTimer()">Pauza</button><button id="wpCompleteButton" class="workoutPrimaryAction" onclick="completeSetCircuit()">Seria wykonana</button><button id="wpNextButton" class="workoutNextAction" onclick="nextCircuitStep()">Następne →</button><button id="wpFinishButton" class="bad finishWorkoutButton" onclick="finishWorkoutFromPlayer()">Zakończ</button><div class="workoutPlayerStatus"><span id="wpWakeStatus"></span><span id="wpFullscreenStatus"></span><span>Postęp zapisywany automatycznie</span></div></div>`;
+ document.body.appendChild(player);const img=player.querySelector('#wpImage');img.addEventListener('error',()=>player.querySelector('#wpMedia')?.classList.add('noImage'));img.addEventListener('load',()=>player.querySelector('#wpMedia')?.classList.remove('noImage'));return player;
+};
+
+updateWorkoutPlayer=window.updateWorkoutPlayer=function updateWorkoutPlayerV18(){
+ const player=ensureWorkoutPlayer();if(!workoutSessionActive)return;
+ const steps=circuitSteps();let pos=currentStepIndex();if(pos<0&&steps.length){pos=0;currentExerciseIndex=steps[0].idx;currentSet=steps[0].set}
+ const step=steps[pos];if(!step)return;
+ const isRest=mode==='rest',nextStep=steps[pos+1],displayStep=isRest&&nextStep?nextStep:step,ex=displayStep.e||{},target=exerciseTargetForSet(ex,displayStep.set);
+ setWorkoutText('wpWorkoutName',todayWorkout()?.name||'Trening');
+ setWorkoutText('wpProgress',isRest&&nextStep?`Przerwa • następny krok ${pos+2} z ${steps.length}`:`Krok ${pos+1} z ${steps.length} • ${Math.round(((pos+1)/steps.length)*100)}%`);
+ setWorkoutText('wpPhase',isRest?'ODPOCZYNEK':'ĆWICZENIE');document.getElementById('wpPhase')?.classList.toggle('rest',isRest);
+ setWorkoutText('wpExerciseName',isRest&&nextStep?`Następne: ${ex.name||'Ćwiczenie'}`:(ex.name||'Ćwiczenie'));
+ const preview=document.getElementById('wpPreviewNote');if(preview){preview.classList.toggle('hidden',!isRest);preview.textContent=isRest?(nextStep?`Przygotuj się: seria ${displayStep.set}, ${target.reps?target.reps+' powt.':target.seconds?target.seconds+' s':'wykonaj ćwiczenie'}`:'Ostatni krok treningu.') : ''}
+ setWorkoutText('wpDescription',ex.desc||'Brak dodatkowego opisu.');
+ setWorkoutText('wpSet',`${displayStep.set}/${Math.max(1,Number(ex.sets||1))}`);setWorkoutText('wpReps',target.reps||'—');setWorkoutText('wpTime',target.seconds?`${target.seconds} s`:'—');updateWorkoutElapsedDisplay();updateWorkoutPlayerImage(ex);
+ const hasCountdown=isRest||Number(target.seconds||0)>0;player.classList.toggle('timerless',!hasCountdown);
+ setWorkoutText('wpTimer',hasCountdown?formatWorkoutTime(timerLeft):(target.reps||'—'));
+ setWorkoutText('wpTimerCaption',isRest?(workoutSessionPaused?'Odpoczynek wstrzymany':`Odpoczynek ${workoutRestDurationAfterCurrent()===FORMA_SERIES_REST_SECONDS?'między seriami':'między ćwiczeniami'}`):(target.seconds?(workoutSessionPaused?'Ćwiczenie wstrzymane':(workoutTimerRunning?'Czas ćwiczenia — odliczanie':'Czas zakończony')):'Wykonaj podaną liczbę powtórzeń'));
+ const pause=document.getElementById('wpPauseButton');if(pause){pause.hidden=false;pause.disabled=false;pause.textContent=workoutSessionPaused?'Wznów':'Pauza'}
+ const complete=document.getElementById('wpCompleteButton');if(complete){complete.textContent='Seria wykonana';complete.disabled=isRest}
+ const nextBtn=document.getElementById('wpNextButton');if(nextBtn){nextBtn.textContent='Następne →';nextBtn.disabled=false}
+ const prevBtn=document.getElementById('wpPreviousButton');if(prevBtn)prevBtn.disabled=pos<=0&&!isRest;
+ const normalTimer=document.getElementById('timerBox');if(normalTimer)normalTimer.textContent=(timerLeft||0)+'s';
+ workoutStateSave();
+};
+
+startTimer=window.startTimer=function startTimerV18(){
+ clearInterval(timerId);if(workoutSessionPaused||Number(timerLeft||0)<=0){workoutTimerRunning=false;workoutTimerEndsAt=0;updateWorkoutPlayer();return}
+ workoutTimerRunning=true;workoutTimerEndsAt=Date.now()+Number(timerLeft)*1000;
+ const tick=()=>{if(!workoutTimerRunning||workoutSessionPaused)return;timerLeft=Math.max(0,Math.ceil((workoutTimerEndsAt-Date.now())/1000));updateWorkoutPlayer();if(timerLeft<=0){clearInterval(timerId);timerId=null;workoutTimerRunning=false;workoutTimerEndsAt=0;try{navigator.vibrate?.([140,80,140])}catch{}updateWorkoutPlayer();if(mode==='rest')setTimeout(()=>nextCircuitStep(),350)}};
+ tick();timerId=setInterval(tick,500);
+};
+
+toggleWorkoutTimer=window.toggleWorkoutTimer=function toggleWorkoutTimerV18(){if(workoutSessionPaused)resumeWorkoutSessionClock();else pauseWorkoutSessionClock()};
+
+setWorkoutStepPosition=window.setWorkoutStepPosition=function setWorkoutStepPositionV18(pos,autoStart=true){
+ const steps=circuitSteps();if(!steps.length)return;if(pos<0)pos=0;if(pos>=steps.length){finishWorkoutFromPlayer();return}
+ stopWorkoutTimer();mode='work';currentExerciseIndex=steps[pos].idx;currentSet=steps[pos].set;const target=exerciseTargetForSet(steps[pos].e,steps[pos].set);timerLeft=Number(target.seconds||0);renderWorkouts();updateWorkoutPlayer();if(autoStart&&!workoutSessionPaused&&timerLeft>0)startTimer();
+};
+previousWorkoutStep=window.previousWorkoutStep=function previousWorkoutStepV18(){setWorkoutStepPosition(currentStepIndex()-1,true)};
+nextCircuitStep=window.nextCircuitStep=function nextCircuitStepV18(){if(mode==='work'&&typeof recordCurrentSet==='function')recordCurrentSet(false);setWorkoutStepPosition(currentStepIndex()+1,true)};
+startRest=window.startRest=function startRestV18(){
+ const duration=workoutRestDurationAfterCurrent();if(!duration){stopWorkoutTimer();mode='work';timerLeft=0;updateWorkoutPlayer();finishWorkoutFromPlayer();return}
+ stopWorkoutTimer();mode='rest';timerLeft=duration;renderWorkouts();updateWorkoutPlayer();if(!workoutSessionPaused)startTimer();
+};
+completeSetCircuit=window.completeSetCircuit=function completeSetCircuitV18(){if(mode==='rest'){nextCircuitStep();return}if(typeof recordCurrentSet==='function')recordCurrentSet(true);startRest()};
+
+restoreWorkoutState=window.restoreWorkoutState=function restoreWorkoutStateV18(state){
+ const all=workouts();let wi=Number(state.workoutIndex||0);if(state.workoutId){const found=all.findIndex(x=>x.id===state.workoutId);if(found>=0)wi=found}currentWorkoutIndex=Math.max(0,Math.min(wi,all.length-1));currentExerciseIndex=Number(state.exerciseIndex||0);currentSet=Math.max(1,Number(state.set||1));mode=state.mode==='rest'?'rest':'work';selectedWorkoutDate=state.date||iso();timerLeft=Math.max(0,Number(state.timerLeft||0));workoutTimerRunning=false;workoutTimerEndsAt=0;workoutSessionPaused=!!state.sessionPaused;
+ if(state.timerRunning&&!workoutSessionPaused&&Number(state.timerEndsAt)>0){timerLeft=Math.max(0,Math.ceil((Number(state.timerEndsAt)-Date.now())/1000));if(timerLeft>0)workoutTimerEndsAt=Date.now()+timerLeft*1000}
+ activeWorkoutSession=state.activeWorkoutSession&&typeof state.activeWorkoutSession==='object'?JSON.parse(JSON.stringify(state.activeWorkoutSession)):{startedAt:state.updatedAt||new Date().toISOString(),totalPausedMs:0,pausedAt:null,results:{}};activeWorkoutSession.totalPausedMs=Number(activeWorkoutSession.totalPausedMs||0);if(workoutSessionPaused&&!activeWorkoutSession.pausedAt)activeWorkoutSession.pausedAt=new Date().toISOString();workoutSessionActive=true;renderWorkouts();const dateEl=document.getElementById('workoutDate'),noteEl=document.getElementById('workoutNote'),partialEl=document.getElementById('workoutPartial');if(dateEl)dateEl.value=state.date||iso();if(noteEl)noteEl.value=state.note||'';if(partialEl)partialEl.checked=!!state.partial;
+};
+
+const formaV18BaseShowWorkoutPlayer=showWorkoutPlayer;
+showWorkoutPlayer=window.showWorkoutPlayer=function showWorkoutPlayerV18(requestFullscreenNow=true){formaV18BaseShowWorkoutPlayer(requestFullscreenNow);startWorkoutElapsedHeartbeat();updateWorkoutPlayer()};
+startWorkout=window.startWorkout=function startWorkoutV18(){
+ const saved=workoutStateRead();if(saved&&workoutStateValid(saved)&&!workoutSessionActive){restoreWorkoutState(saved);showWorkoutPlayer(true);if(saved.timerRunning&&!workoutSessionPaused&&timerLeft>0)startTimer();return}
+ if(workoutSessionActive){showWorkoutPlayer(true);if(workoutTimerRunning&&!workoutSessionPaused&&timerLeft>0)startTimer();return}
+ const set=todayWorkout();if(!set?.ex?.length){alert('Ten zestaw nie ma ćwiczeń.');return}
+ stopWorkoutTimer();workoutSessionActive=true;workoutSessionPaused=false;activeWorkoutSession={startedAt:new Date().toISOString(),totalPausedMs:0,pausedAt:null,results:{}};mode='work';currentExerciseIndex=0;currentSet=1;timerLeft=Number(exerciseTargetForSet(set.ex[0],1).seconds||0);renderWorkouts();showWorkoutPlayer(true);workoutStateSave();if(timerLeft>0)startTimer();
+};
+resumeWorkoutFromSaved=window.resumeWorkoutFromSaved=function resumeWorkoutFromSavedV18(){const state=workoutStateRead();if(!workoutStateValid(state)){workoutStateClear();renderWorkouts();return}restoreWorkoutState(state);showWorkoutPlayer(true);if(state.timerRunning&&!workoutSessionPaused&&timerLeft>0)startTimer()};
+
+const formaV18BaseExitWorkoutPlayer=exitWorkoutPlayer;
+exitWorkoutPlayer=window.exitWorkoutPlayer=async function exitWorkoutPlayerV18(){if(workoutSessionActive&&!workoutSessionPaused)pauseWorkoutSessionClock();stopWorkoutElapsedHeartbeat();return formaV18BaseExitWorkoutPlayer()};
+const formaV18BaseAbandonWorkoutSession=abandonWorkoutSession;
+abandonWorkoutSession=window.abandonWorkoutSession=function abandonWorkoutSessionV18(){const out=formaV18BaseAbandonWorkoutSession();if(!workoutSessionActive){stopWorkoutElapsedHeartbeat();workoutSessionPaused=false}return out};
+const formaV18BaseFinishWorkout=finishWorkout;
+finishWorkout=window.finishWorkout=function finishWorkoutV18Final(){stopWorkoutElapsedHeartbeat();workoutSessionPaused=false;return formaV18BaseFinishWorkout()};
+finishWorkoutFromPlayer=window.finishWorkoutFromPlayer=function finishWorkoutFromPlayerV18(){if(confirm('Zakończyć trening i zapisać go w historii?'))finishWorkout()};
+
+Object.assign(window,{exerciseTargetForSet,updateWorkoutPlayer,ensureWorkoutPlayer,startWorkout,startTimer,startRest,completeSetCircuit,nextCircuitStep,previousWorkoutStep,toggleWorkoutTimer,setWorkoutStepPosition,restoreWorkoutState,resumeWorkoutFromSaved,exitWorkoutPlayer,abandonWorkoutSession,finishWorkout,finishWorkoutFromPlayer,recordCurrentSet,workoutStateSave});
 </script>
 </body>
 </html>

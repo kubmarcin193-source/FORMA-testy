@@ -1,15 +1,15 @@
-Forma PRO PWA v17.3
-Data: 2026-08-04
+Forma PRO PWA v18.0
+Data: 2026-08-05
 
-Nowości v17.3:
-- usunięto z publicznych plików stałą sól i weryfikator hasła aplikacji
-- przy pierwszym uruchomieniu każdej instalacji użytkownik sam ustawia lokalne hasło
-- sól i weryfikator PBKDF2-SHA-256 powstają losowo dopiero w przeglądarce i nie trafiają do GitHuba
-- telefon po pierwszym poprawnym uruchomieniu może pozostać zapamiętany
-- komputer wymaga hasła po uruchomieniu i blokuje aplikację po 5 minutach bezczynności
-- zachowano centralne zdjęcia ćwiczeń z v17.2
-
-Bezpieczeństwo paczki publicznej:
-- brak jawnego hasła
-- brak wbudowanego weryfikatora konkretnego hasła
-- brak danych osobowych, zdjęć użytkownika, adresów e-mail, numerów telefonu, tokenów i kluczy API
+Najważniejsze zmiany:
+- pierwsze logowanie wymaga ustalonego hasła właściciela; nie ma ekranu tworzenia nowego hasła
+- jawne hasło nie występuje w plikach aplikacji; lokalna weryfikacja używa PBKDF2
+- telefon może zostać zapamiętany po pierwszym poprawnym logowaniu
+- niewykonane plany po terminie znikają z dnia i podsumowania tygodnia
+- usunięto zakładkę Posiłki
+- odświeżono wygląd aplikacji
+- cele serii maleją stopniowo: ostatnia seria ma około 50% wartości pierwszej
+- stała kolejność przycisków: Poprzednie, Pauza/Wznów, Seria wykonana, Następne, Zakończ
+- odpoczynek pokazuje następne ćwiczenie, zdjęcie i cel
+- pole Odpoczynek zastąpiono Timerem czasu całego treningu
+- przerwa między ćwiczeniami: 20 s; między seriami obwodu: 60 s; po ostatnim kroku: 0 s
