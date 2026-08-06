@@ -1,14 +1,7 @@
-FORMA PRO PWA v18.2 — PACZKA BEZ WBUDOWANYCH ĆWICZEŃ
+FORMA PRO PWA v18.3
 
-1. Rozpakuj ZIP.
-2. Wgraj wszystkie pliki do katalogu publikowanego na GitHub Pages lub serwerze.
-3. Nadpisz stare pliki.
-4. Zamknij aplikację całkowicie i otwórz ponownie.
-5. W zakładce Ćwiczenia wybierz import pliku JSON.
-6. Ustaw tryb: „Zastąp tylko zakładkę Ćwiczenia”.
+1. Wgraj wszystkie pliki z tego folderu, zastępując poprzednią wersję.
+2. Po aktualizacji całkowicie zamknij aplikację i uruchom ją ponownie.
+3. Zaimportuj osobny plik ćwiczeń JSON w trybie „Zastąp tylko zakładkę Ćwiczenia”.
 
-WAŻNE:
-- ta paczka nie dodaje żadnych przykładowych ćwiczeń ani zestawów;
-- jeżeli aplikacja była wcześniej używana na tej samej domenie, stare dane pozostają w pamięci przeglądarki;
-- import w trybie „Zastąp” podmieni wyłącznie ćwiczenia, zestawy, ich zdjęcia i historię progresu;
-- mechanizm zmniejszania liczby powtórzeń/czasu działa automatycznie na danych z importu.
+Ta paczka nie zawiera wbudowanych zestawów ćwiczeń ani zdjęć użytkownika.

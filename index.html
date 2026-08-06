@@ -1655,7 +1655,7 @@ function render(){
 }
 /* ===== FORMA PRO v12: kopie, migracje, progres, biblioteka, zdjęcia i kalendarz ===== */
 const APP_DATA_VERSION=16;
-const APP_RELEASE="18.2.0";
+const APP_RELEASE="18.3.0";
 const BACKUP_FORMAT_VERSION=4;
 const EXERCISE_BACKUP_VERSION=1;
 const AUTO_BACKUP_DB="forma_pro_auto_backup_db_v1";
@@ -3363,5 +3363,169 @@ restoreWorkoutState=window.restoreWorkoutState=function restoreWorkoutStateV181(
 
 Object.assign(window,{ensureWorkoutAudio,primeWorkoutAudio,playWorkoutTone,workoutElapsedSeconds,pauseWorkoutSessionClock,resumeWorkoutSessionClock,startTimer,updateWorkoutPlayer,startWorkout,resumeWorkoutFromSaved,restoreWorkoutState});
 </script>
+
+
+<style>
+/* ===== Forma PRO v18.3 — rotacja zestawów i zwijane listy ===== */
+.nextWorkoutSuggestion{margin:12px 0;padding:12px 14px;border-radius:14px;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.35)}
+.nextWorkoutSuggestion b{display:block;margin-bottom:3px}
+.workoutSetDetails{padding:0;overflow:hidden}
+.workoutSetDetails>summary{cursor:pointer;list-style:none;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-weight:800}
+.workoutSetDetails>summary::-webkit-details-marker{display:none}
+.workoutSetDetails>summary::after{content:'＋';font-size:22px;line-height:1;color:var(--accent,#35d399)}
+.workoutSetDetails[open]>summary::after{content:'−'}
+.workoutSetDetails[open]>summary{border-bottom:1px solid rgba(148,163,184,.18)}
+.workoutSetDetails .workoutSetDetailsBody{padding:0 18px 18px}
+.workoutSetSummaryMeta{font-size:12px;font-weight:600;opacity:.7;white-space:nowrap}
+@media(max-width:640px){.workoutSetDetails>summary{padding:14px}.workoutSetDetails .workoutSetDetailsBody{padding:0 14px 14px}}
+</style>
+
+<script>
+/* ===== Forma PRO v18.3 — parzyste cele, joga bez redukcji, historia czasu i automatyczna rotacja ===== */
+const FORMA_NEXT_WORKOUT_KEY='forma_pro_next_workout_id_v183';
+let formaV183WorkoutSignature='';
+
+function formaV183WorkoutListSignature(){return workouts().map(x=>String(x.id||x.name||'')).join('|')}
+function formaV183NewestWorkoutLog(){
+ return workoutLog().slice().sort((a,b)=>String(b.createdAt||b.date||'').localeCompare(String(a.createdAt||a.date||'')))[0]||null;
+}
+function formaV183SuggestedWorkoutId(){
+ const list=workouts();if(!list.length)return '';
+ const stored=localStorage.getItem(FORMA_NEXT_WORKOUT_KEY);
+ if(stored&&list.some(x=>String(x.id)===String(stored)))return stored;
+ const last=formaV183NewestWorkoutLog();
+ if(last){
+  let idx=list.findIndex(x=>String(x.id||'')===String(last.workoutId||''));
+  if(idx<0)idx=list.findIndex(x=>normalizeExerciseName(x.name)===normalizeExerciseName(last.workout));
+  if(idx>=0)return String(list[(idx+1)%list.length].id||'');
+ }
+ return String(list[0].id||'');
+}
+function formaV183ApplySuggestedWorkout(){
+ const list=workouts(),sig=formaV183WorkoutListSignature();
+ if(!list.length){formaV183WorkoutSignature='';return}
+ if(sig===formaV183WorkoutSignature||workoutSessionActive)return;
+ formaV183WorkoutSignature=sig;
+ const wanted=formaV183SuggestedWorkoutId();
+ const idx=list.findIndex(x=>String(x.id||'')===String(wanted));
+ if(idx>=0){currentWorkoutIndex=idx;currentExerciseIndex=0;currentSet=1;timerLeft=0}
+}
+function formaV183RememberNextWorkout(completedWorkoutId){
+ const list=workouts();if(!list.length)return;
+ let idx=list.findIndex(x=>String(x.id||'')===String(completedWorkoutId||''));
+ if(idx<0)idx=Math.max(0,Math.min(currentWorkoutIndex,list.length-1));
+ const next=(idx+1)%list.length;
+ localStorage.setItem(FORMA_NEXT_WORKOUT_KEY,String(list[next].id||''));
+ currentWorkoutIndex=next;currentExerciseIndex=0;currentSet=1;timerLeft=0;
+}
+function formaV183IsFixedTargetExercise(exr){
+ const marker=String(exr?.progression||'').toLowerCase();
+ const name=String(exr?.name||'').toLowerCase();
+ return marker==='fixed'||marker==='stałe'||name.includes('(joga)')||/\b(joga|yoga)\b/i.test(name);
+}
+function formaV183Even(value){
+ const n=Math.max(0,Number(value)||0);if(!n)return 0;
+ return Math.max(2,Math.round(n/2)*2);
+}
+function formaV183EvenRepsForSet(base,setNo,totalSets){
+ const total=Math.max(1,Number(totalSets)||1),set=Math.max(1,Math.min(total,Number(setNo)||1));
+ let previous=formaV183Even(base),value=previous;
+ if(set===1||total===1)return previous;
+ for(let s=2;s<=set;s++){
+  const factor=1-(0.5*(s-1)/(total-1));
+  value=formaV183Even(Number(base)*factor);
+  value=Math.max(2,Math.min(value,previous-2));
+  previous=value;
+ }
+ return value;
+}
+exerciseTargetForSet=window.exerciseTargetForSet=function exerciseTargetForSetV183(exr,setNo){
+ const sets=Math.max(1,Number(exr?.sets||1));
+ const fixed=formaV183IsFixedTargetExercise(exr);
+ const factor=fixed?1:formaSeriesFactor(setNo,sets);
+ const suggested=typeof exerciseSuggestion==='function'?exerciseSuggestion(exr):{};
+ const baseReps=Number(exr?.reps||suggested.reps||0),baseSeconds=Number(exr?.seconds||suggested.seconds||0);
+ return {
+  reps:baseReps?(fixed?formaV183Even(baseReps):formaV183EvenRepsForSet(baseReps,setNo,sets)):'',
+  seconds:baseSeconds?(fixed?formaRoundTime(baseSeconds):formaRoundTime(baseSeconds*factor)):'',
+  load:suggested.load||'',factor,fixed
+ };
+};
+function formaV183DurationText(seconds){
+ const total=Math.max(0,Math.round(Number(seconds)||0));if(!total)return '—';
+ const h=Math.floor(total/3600),m=Math.floor((total%3600)/60),s=total%60;
+ if(h)return `${h} godz. ${String(m).padStart(2,'0')} min`;
+ return `${m}:${String(s).padStart(2,'0')}`;
+}
+function formaV183RemoveOrderCard(root){
+ [...root.querySelectorAll('.card')].forEach(card=>{if(card.querySelector(':scope > h2')?.textContent.trim()==='Kolejność i zapis serii')card.remove()});
+}
+function formaV183RenderHistory(root){
+ const card=[...root.querySelectorAll('.card')].find(x=>x.querySelector(':scope > h2')?.textContent.trim()==='Historia treningów');
+ if(!card)return;
+ const table=card.querySelector('table');if(!table)return;
+ const rows=workoutLog().slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))||String(b.createdAt||'').localeCompare(String(a.createdAt||''))).map(x=>`<tr><td>${x.date}</td><td>${esc(x.workout||'Trening')}</td><td>${x.partial?'Niepełny':'Pełny'}</td><td>${resultCountForLog(x)} serii</td><td><b>${formaV183DurationText(x.durationSeconds)}</b></td><td>${esc(x.note||'')}</td><td class="historyActions"><button class="ghost" onclick="editWorkoutLogEntry('${x.id}')">Edytuj</button><button class="bad" onclick="deleteWorkoutLogEntry('${x.id}')">Usuń</button></td></tr>`).join('');
+ table.innerHTML=`<tr><th>Data</th><th>Zestaw</th><th>Status</th><th>Serie</th><th>Czas</th><th>Notatka</th><th></th></tr>${rows||'<tr><td colspan="7">Brak zapisanych treningów.</td></tr>'}`;
+}
+function formaV183CollapseSets(root){
+ const marker=[...root.querySelectorAll('.card')].find(x=>x.querySelector(':scope > h2')?.textContent.trim()==='Twoje zestawy');
+ if(!marker)return;
+ let node=marker.nextElementSibling;
+ while(node&&node.id!=='setEditor'){
+  const next=node.nextElementSibling;
+  if(node.classList?.contains('card')&&node.querySelector(':scope > h3')){
+   const title=node.querySelector(':scope > h3')?.textContent.trim()||'Zestaw';
+   const count=node.querySelectorAll('.compactExerciseList > .stat').length;
+   const details=document.createElement('details');details.className='card workoutSetDetails';
+   const summary=document.createElement('summary');summary.innerHTML=`<span>${esc(title)}</span><span class="workoutSetSummaryMeta">${count} ćwiczeń</span>`;
+   const body=document.createElement('div');body.className='workoutSetDetailsBody';
+   [...node.childNodes].forEach(child=>{if(child.nodeType===1&&child.matches('h3'))return;body.appendChild(child)});
+   details.append(summary,body);node.replaceWith(details);
+  }
+  node=next;
+ }
+}
+function formaV183ShowSuggestion(root){
+ const first=[...root.querySelectorAll('.card')].find(x=>x.querySelector(':scope > h2')?.textContent.trim()==='Trening i progres');
+ if(!first)return;
+ const list=workouts(),id=formaV183SuggestedWorkoutId(),set=list.find(x=>String(x.id||'')===String(id));
+ if(!set)return;
+ const box=document.createElement('div');box.className='nextWorkoutSuggestion';
+ box.innerHTML=`<b>⭐ Proponowany kolejny zestaw</b>${esc(set.name)}<br><small>Po zapisaniu treningu aplikacja automatycznie przejdzie do następnego zestawu, a po ostatnim wróci do pierwszego.</small>`;
+ const h=first.querySelector('h2');h?.insertAdjacentElement('afterend',box);
+}
+const formaV183BaseRenderWorkouts=window.renderWorkouts;
+renderWorkouts=window.renderWorkouts=async function renderWorkoutsV183(){
+ formaV183ApplySuggestedWorkout();
+ await formaV183BaseRenderWorkouts();
+ const root=document.getElementById('workouts');if(!root)return;
+ formaV183RemoveOrderCard(root);formaV183RenderHistory(root);formaV183CollapseSets(root);formaV183ShowSuggestion(root);
+};
+
+const formaV183BaseFinishWorkout=window.finishWorkout;
+finishWorkout=window.finishWorkout=function finishWorkoutV183(){
+ const completed=todayWorkout();
+ const completedId=completed?.id||'';
+ const completedName=completed?.name||'Trening';
+ const date=document.getElementById('workoutDate')?.value||selectedWorkoutDate||iso();
+ const elapsed=typeof workoutElapsedSeconds==='function'?workoutElapsedSeconds():0;
+ const hadSession=!!activeWorkoutSession?.startedAt||!!workoutSessionActive;
+ const beforeCount=workoutLog().length;
+ const out=formaV183BaseFinishWorkout();
+ const saved=!workoutSessionActive&&(!activeWorkoutSession?.startedAt||Object.keys(activeWorkoutSession?.results||{}).length===0);
+ if(hadSession&&saved){
+  const log=workoutLog();
+  let candidates=log.map((x,i)=>({x,i})).filter(o=>o.x.date===date&&(String(o.x.workoutId||'')===String(completedId)||normalizeExerciseName(o.x.workout)===normalizeExerciseName(completedName)));
+  candidates.sort((a,b)=>String(b.x.createdAt||'').localeCompare(String(a.x.createdAt||'')));
+  if(candidates.length){log[candidates[0].i]={...log[candidates[0].i],durationSeconds:Math.max(1,Number(elapsed)||0)};saveWorkoutLog(log)}
+  formaV183RememberNextWorkout(completedId);
+  setTimeout(()=>renderWorkouts(),0);
+ }
+ return out;
+};
+
+Object.assign(window,{exerciseTargetForSet,renderWorkouts,finishWorkout,formaV183SuggestedWorkoutId});
+</script>
+
 </body>
 </html>

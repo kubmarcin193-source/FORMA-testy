@@ -1,11 +1,1 @@
-Forma PRO PWA v18.2 — wersja bez wbudowanych ćwiczeń
-Data: 2026-08-05
-
-Najważniejsze zmiany:
-- aplikacja nie zawiera startowych zestawów ani biblioteki ćwiczeń
-- gotowy plik ćwiczeń można zaimportować w trybie „Zastąp tylko zakładkę Ćwiczenia”
-- liczba powtórzeń i czas automatycznie zmniejszają się z każdą serią
-- 20 sekund odpoczynku między ćwiczeniami i 60 sekund między seriami
-- dźwięki odliczania oraz nieprzerwany Timer całego treningu
-
-Uwaga: podmiana plików na tej samej domenie nie usuwa danych zapisanych wcześniej w pamięci przeglądarki. Aby wgrać swoje gotowe zestawy bez dublowania, wybierz import ćwiczeń w trybie „Zastąp tylko zakładkę Ćwiczenia”.
+Forma PRO PWA v18.3 — rotacja zestawów, historia czasu i zwijane zestawy
