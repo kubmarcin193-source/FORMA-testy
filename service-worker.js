@@ -1,5 +1,5 @@
 /* Forma PRO — stabilny PWA dla GitHub Pages */
-const CACHE_NAME = "forma-pro-pwa-v18-3-rotation-2026-08-06";
+const CACHE_NAME = "forma-pro-pwa-v18-5-series-rotation-2026-08-09";
 const CACHE_PREFIX = "forma-pro-pwa-";
 
 const APP_SHELL = [

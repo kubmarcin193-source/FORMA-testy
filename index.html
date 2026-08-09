@@ -1655,7 +1655,7 @@ function render(){
 }
 /* ===== FORMA PRO v12: kopie, migracje, progres, biblioteka, zdjęcia i kalendarz ===== */
 const APP_DATA_VERSION=16;
-const APP_RELEASE="18.3.0";
+const APP_RELEASE="18.5.0";
 const BACKUP_FORMAT_VERSION=4;
 const EXERCISE_BACKUP_VERSION=1;
 const AUTO_BACKUP_DB="forma_pro_auto_backup_db_v1";
@@ -3525,6 +3525,272 @@ finishWorkout=window.finishWorkout=function finishWorkoutV183(){
 };
 
 Object.assign(window,{exerciseTargetForSet,renderWorkouts,finishWorkout,formaV183SuggestedWorkoutId});
+</script>
+
+
+<style id="forma-v184-calendar-fix">
+/* ===== Forma PRO v18.4 — kalendarz i ręczne wpisy ===== */
+.dayCell{cursor:pointer;overflow:hidden}
+.dayCell .dayIcons{align-items:center;align-content:flex-start}
+.dayCell .iconPill{
+ width:22px!important;height:22px!important;min-width:22px!important;max-width:22px!important;
+ padding:0!important;margin:0!important;font-size:12px!important;line-height:1!important;
+ border-radius:999px!important;display:inline-flex!important;flex:0 0 22px!important
+}
+.dayCell .iconPill::after{content:none!important}
+.dayFullCard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:14px}
+.calendarManualGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.calendarManualGrid .full{grid-column:1/-1}
+.calendarSection{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.dayLogItem{background:#020617;border:1px solid var(--line);border-radius:12px;padding:10px;margin:7px 0}
+.dayLogItem small{color:var(--muted)}
+.calendarHint{display:block;color:var(--muted);line-height:1.45;margin-top:8px}
+@media(max-width:650px){
+ .calendar{gap:3px}
+ .dayCell{min-height:66px;padding:5px 3px}
+ .dayCell .iconPill{width:19px!important;height:19px!important;min-width:19px!important;max-width:19px!important;flex-basis:19px!important;font-size:10px!important}
+ .dayCell button::after{content:none!important}
+ .calendarManualGrid{grid-template-columns:1fr}
+ .calendarManualGrid .full{grid-column:auto}
+}
+</style>
+<script id="forma-v184-calendar-workout-fix">
+/* ===== Forma PRO v18.4 ===== */
+const FORMA_V184_STRETCH_RE=/(\bjoga\b|\byoga\b|rozciąg|stretch|rozluźn|mobiliz)/i;
+
+function formaV184IsLastSeriesOnlyExercise(exr){
+ const marker=String(exr?.seriesMode||exr?.executionMode||'').toLowerCase();
+ const text=`${exr?.name||''} ${exr?.desc||''}`;
+ return marker==='last_only'||marker==='last-series-only'||marker==='ostatnia_seria'||FORMA_V184_STRETCH_RE.test(text);
+}
+
+circuitSteps=window.circuitSteps=function circuitStepsV184(){
+ const cur=todayWorkout(),exs=cur?.ex||[];let steps=[];
+ const maxSets=Math.max(1,...exs.map(e=>Number(e.sets||1)));
+ for(let s=1;s<=maxSets;s++){
+  exs.forEach((e,i)=>{
+   if(formaV184IsLastSeriesOnlyExercise(e)){
+    if(s===maxSets)steps.push({set:s,idx:i,e});
+   }else if(Number(e.sets||1)>=s){
+    steps.push({set:s,idx:i,e});
+   }
+  });
+ }
+ return steps;
+};
+
+exerciseTargetForSet=window.exerciseTargetForSet=function exerciseTargetForSetV184(exr,setNo){
+ const sets=Math.max(1,Number(exr?.sets||1));
+ const fixed=formaV184IsLastSeriesOnlyExercise(exr)||(typeof formaV183IsFixedTargetExercise==='function'&&formaV183IsFixedTargetExercise(exr));
+ const factor=fixed?1:formaSeriesFactor(setNo,sets);
+ const suggested=typeof exerciseSuggestion==='function'?exerciseSuggestion(exr):{};
+ const baseReps=Number(exr?.reps||suggested.reps||0),baseSeconds=Number(exr?.seconds||suggested.seconds||0);
+ return {
+  reps:baseReps?(fixed?formaV183Even(baseReps):formaV183EvenRepsForSet(baseReps,setNo,sets)):'',
+  seconds:baseSeconds?(fixed?formaRoundTime(baseSeconds):formaRoundTime(baseSeconds*factor)):'',
+  load:suggested.load||'',factor,fixed
+ };
+};
+
+cleanupExpiredPlans=window.cleanupExpiredPlans=function cleanupExpiredPlansV184(){
+ let c=calData(),today=iso(),changed=false,missedInjection=false;
+ Object.entries(PLAN_FIELDS).forEach(([type,field])=>{
+  Object.keys(c).sort().forEach(date=>{
+   if(date<today&&c[date]?.[field]&&!actualForPlanType(type,date)){
+    delete c[date][field];changed=true;
+    if(type==='injection')missedInjection=true;
+   }
+  });
+  if(type==='injection'&&missedInjection){
+   Object.keys(c).forEach(date=>{
+    if(date>=today&&c[date]?.[field]){delete c[date][field];changed=true}
+   });
+  }else{
+   const future=Object.keys(c).filter(date=>date>=today&&c[date]?.[field]).sort();
+   future.slice(1).forEach(date=>{delete c[date][field];changed=true});
+  }
+ });
+ if(changed)jset(KEYS.calendar,pruneEmptyCalendar(c));
+ const carry=planCarry();
+ if(missedInjection&&carry.injection)delete carry.injection;
+ if(Object.keys(carry).length)jset(KEYS.calendarPlanCarry,carry);else jset(KEYS.calendarPlanCarry,{});
+};
+
+function formaV184SaveDayActivity(date){
+ const all=data(),old=dayEntry(date);
+ all[date]={
+  ...old,
+  steps:String(document.getElementById('edSteps')?.value||'').trim(),
+  treadmillMin:String(document.getElementById('edTreadmill')?.value||'').trim(),
+  gymMin:String(document.getElementById('edGym')?.value||'').trim(),
+  note:String(document.getElementById('edDayNote')?.value||'').trim()
+ };
+ if(!Object.values(all[date]).some(v=>String(v??'').trim()!==''))delete all[date];
+ jset(KEYS.data,all);
+}
+
+function formaV184AddManualWorkout(date){
+ const name=String(document.getElementById('edManualWorkoutName')?.value||'').trim()||'Trening ręczny';
+ const minutes=Math.max(0,Number(document.getElementById('edManualWorkoutMinutes')?.value||0));
+ const note=String(document.getElementById('edManualWorkoutNote')?.value||'').trim();
+ const log=workoutLog();
+ log.push({
+  id:uid('manual_workout'),date,workout:name,workoutId:'manual',
+  note,partial:false,durationSeconds:minutes?Math.round(minutes*60):0,
+  createdAt:new Date().toISOString(),manual:true
+ });
+ saveWorkoutLog(log);
+ completeRecurringTask('training',date,false);
+ render();
+ setTimeout(()=>editDay(date),0);
+}
+
+function formaV184RemoveManualWorkout(id,date){
+ if(!confirm('Usunąć ten ręczny wpis treningu?'))return;
+ saveWorkoutLog(workoutLog().filter(x=>String(x.id)!==String(id)));
+ render();
+ setTimeout(()=>editDay(date),0);
+}
+
+editDay=window.editDay=function editDayV184(date){
+ const d=calData()[date]||{},e=dayEntry(date),b=bodyData().find(x=>x.date===date)||{},logs=workoutLog().filter(x=>x.date===date),ph=photos().find(x=>x.date===date),done=completedTrainingsForDate(date);
+ selectedBodyDate=date;selectedWorkoutDate=date;
+ const logHtml=logs.map(x=>{
+  const dur=Number(x.durationSeconds||0);
+  const durText=dur?(typeof formaV183DurationText==='function'?formaV183DurationText(dur):`${Math.round(dur/60)} min`):'bez czasu';
+  return `<div class="dayLogItem"><b>${esc(x.workout||'Trening')}</b><br><small>${durText}${x.note?` • ${esc(x.note)}`:''}</small>${x.manual?`<br><button class="bad" onclick="formaV184RemoveManualWorkout('${esc(x.id)}','${date}')">Usuń wpis</button>`:''}</div>`;
+ }).join('')||'<small>Brak zapisanych treningów.</small>';
+ const editor=document.getElementById('dayEditor');if(!editor)return;
+ editor.innerHTML=`<div class="dayFullCard">
+  <h2>📅 ${datePretty(date)}</h2>
+  <div class="daySummaryGrid">
+   <div class="daySummaryBox"><small>Treningi</small><br><b>${done}</b></div>
+   <div class="daySummaryBox"><small>Aktywność</small><br><b>${e.treadmillMin||0}/${e.gymMin||0} min</b><br><small>bieżnia / siłownia</small></div>
+   <div class="daySummaryBox"><small>Pomiary</small><br><b>${b.weight?`${b.weight} kg`:'—'}</b></div>
+   <div class="daySummaryBox"><small>Zdjęcia</small><br><b>${ph?'są':'brak'}</b></div>
+  </div>
+
+  <div class="calendarSection">
+   <h3>Ręczny wpis dnia</h3>
+   <div class="calendarManualGrid">
+    <div><label>Kroki</label><input id="edSteps" type="number" min="0" value="${esc(e.steps||'')}" placeholder="np. 8500"></div>
+    <div><label>Bieżnia — min</label><input id="edTreadmill" type="number" min="0" value="${esc(e.treadmillMin||'')}" placeholder="np. 40"></div>
+    <div><label>Siłownia / ćwiczenia — min</label><input id="edGym" type="number" min="0" value="${esc(e.gymMin||'')}" placeholder="np. 30"></div>
+    <div class="full"><label>Notatka dnia</label><textarea id="edDayNote" placeholder="Dowolny ręczny wpis">${esc(e.note||'')}</textarea></div>
+   </div>
+  </div>
+
+  <div class="calendarSection">
+   <h3>Trening / ćwiczenia ręcznie</h3>
+   <div class="calendarManualGrid">
+    <div><label>Nazwa</label><input id="edManualWorkoutName" placeholder="np. Rozciąganie, trening domowy"></div>
+    <div><label>Czas — min</label><input id="edManualWorkoutMinutes" type="number" min="0" placeholder="np. 25"></div>
+    <div class="full"><label>Notatka</label><input id="edManualWorkoutNote" placeholder="opcjonalnie"></div>
+   </div>
+   <button class="good" onclick="formaV184AddManualWorkout('${date}')">Dodaj trening ręcznie</button>
+   <div>${logHtml}</div>
+  </div>
+
+  <div class="calendarSection">
+   <h3>Oznaczenia</h3>
+   <label><input id="edDuty" type="checkbox" ${d.duty?'checked':''}> Dyżur</label>
+   <label><input id="edTraining" type="checkbox" ${d.training?'checked':''}> Trening zaliczony ręcznie</label>
+   <label><input id="edInjection" type="checkbox" ${d.injection?'checked':''}> Iniekcja wykonana</label>
+   <label>Iniekcja — opis / preparat / dawka</label>
+   <input id="edInjectionNote" value="${esc(d.injectionNote||'')}" placeholder="opcjonalnie">
+  </div>
+
+  <div class="calendarSection">
+   <h3>Plan</h3>
+   <label><input id="edPlanTraining" type="checkbox" ${d.planTraining?'checked':''}> Trening</label>
+   <label><input id="edPlanMeasure" type="checkbox" ${d.planMeasure?'checked':''}> Pomiary</label>
+   <label><input id="edPlanPhoto" type="checkbox" ${d.planPhoto?'checked':''}> Zdjęcia</label>
+   <label><input id="edPlanInjection" type="checkbox" ${d.planInjection?'checked':''}> Iniekcja</label>
+   <small class="calendarHint">Jeżeli zaplanowana iniekcja minie bez oznaczenia wykonania, jej ikona zniknie z tego dnia i wszystkie kolejne zaplanowane iniekcje zostaną anulowane. Nowy cykl możesz rozpocząć, zaznaczając kolejny termin ręcznie.</small>
+  </div>
+
+  <div class="actionRow">
+   <button class="primary" onclick="saveDayFlags('${date}')">Zapisz dzień</button>
+   <button class="ghost" onclick="openBodyForDate('${date}')">Pomiary</button>
+   <button class="ghost" onclick="openWorkoutForDate('${date}')">Trening z zestawu</button>
+   <button class="ghost" onclick="openPhotosForDate('${date}')">Zdjęcia</button>
+  </div>
+ </div>`;
+ editor.scrollIntoView({behavior:'smooth',block:'start'});
+};
+
+saveDayFlags=window.saveDayFlags=function saveDayFlagsV184(date){
+ const old=calData()[date]||{};
+ const duty=!!document.getElementById('edDuty')?.checked;
+ const training=!!document.getElementById('edTraining')?.checked;
+ const injection=!!document.getElementById('edInjection')?.checked;
+ const injectionNote=String(document.getElementById('edInjectionNote')?.value||'').trim();
+ formaV184SaveDayActivity(date);
+
+ let c=calData();
+ c[date]={...old,duty,training,injection,injectionNote};
+ jset(KEYS.calendar,pruneEmptyCalendar(c));
+
+ if(old.injection&&!injection)clearPlansFrom('injection',date);
+
+ setPlanForDate('training',date,!!document.getElementById('edPlanTraining')?.checked);
+ setPlanForDate('measure',date,!!document.getElementById('edPlanMeasure')?.checked);
+ setPlanForDate('photo',date,!!document.getElementById('edPlanPhoto')?.checked);
+ setPlanForDate('injection',date,!!document.getElementById('edPlanInjection')?.checked);
+
+ if(training&&!old.training)completeRecurringTask('training',date,false);
+ if(injection&&!old.injection)completeRecurringTask('injection',date,true);
+
+ cleanupExpiredPlans();
+ render();
+ setTimeout(()=>editDay(date),0);
+};
+
+Object.assign(window,{
+ cleanupExpiredPlans,editDay,saveDayFlags,circuitSteps,exerciseTargetForSet,
+ formaV184AddManualWorkout,formaV184RemoveManualWorkout,formaV184IsLastSeriesOnlyExercise
+});
+</script>
+
+<script id="forma-v185-series-rotation">
+/* ===== Forma PRO v18.5 — ćwiczenia przypisane do konkretnej serii ===== */
+function formaV185SeriesOnly(exr){
+ const raw=Number(exr?.seriesOnly||exr?.onlySeries||0);
+ return Number.isFinite(raw)&&raw>=1?Math.round(raw):0;
+}
+
+circuitSteps=window.circuitSteps=function circuitStepsV185(){
+ const cur=todayWorkout(),exs=cur?.ex||[];let steps=[];
+ const maxSets=Math.max(1,...exs.map(e=>Math.max(Number(e.sets||1),formaV185SeriesOnly(e))));
+ for(let s=1;s<=maxSets;s++){
+  exs.forEach((e,i)=>{
+   const only=formaV185SeriesOnly(e);
+   if(only){if(s===only)steps.push({set:s,idx:i,e});return;}
+   if(typeof formaV184IsLastSeriesOnlyExercise==='function'&&formaV184IsLastSeriesOnlyExercise(e)){
+    if(s===maxSets)steps.push({set:s,idx:i,e});
+    return;
+   }
+   if(Number(e.sets||1)>=s)steps.push({set:s,idx:i,e});
+  });
+ }
+ return steps;
+};
+
+exerciseTargetForSet=window.exerciseTargetForSet=function exerciseTargetForSetV185(exr,setNo){
+ const sets=Math.max(1,Number(exr?.sets||1));
+ const only=formaV185SeriesOnly(exr);
+ const fixed=!!only||(typeof formaV184IsLastSeriesOnlyExercise==='function'&&formaV184IsLastSeriesOnlyExercise(exr))||(typeof formaV183IsFixedTargetExercise==='function'&&formaV183IsFixedTargetExercise(exr));
+ const factor=fixed?1:formaSeriesFactor(setNo,sets);
+ const suggested=typeof exerciseSuggestion==='function'?exerciseSuggestion(exr):{};
+ const baseReps=Number(exr?.reps||suggested.reps||0),baseSeconds=Number(exr?.seconds||suggested.seconds||0);
+ return {
+  reps:baseReps?(fixed?formaV183Even(baseReps):formaV183EvenRepsForSet(baseReps,setNo,sets)):'',
+  seconds:baseSeconds?(fixed?formaRoundTime(baseSeconds):formaRoundTime(baseSeconds*factor)):'',
+  load:suggested.load||'',factor,fixed,seriesOnly:only
+ };
+};
+
+Object.assign(window,{circuitSteps,exerciseTargetForSet,formaV185SeriesOnly});
 </script>
 
 </body>
