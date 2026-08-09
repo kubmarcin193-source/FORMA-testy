@@ -1655,7 +1655,7 @@ function render(){
 }
 /* ===== FORMA PRO v12: kopie, migracje, progres, biblioteka, zdjęcia i kalendarz ===== */
 const APP_DATA_VERSION=16;
-const APP_RELEASE="18.5.0";
+const APP_RELEASE="18.6.0";
 const BACKUP_FORMAT_VERSION=4;
 const EXERCISE_BACKUP_VERSION=1;
 const AUTO_BACKUP_DB="forma_pro_auto_backup_db_v1";
@@ -2251,7 +2251,7 @@ function renderCalendar(){
   return `<button class="weekSummaryRow" onclick="editDay('${w.weekStart}')"><b>Tydzień ${weekNo(w.weekStart)}</b><span>${w.weekStart}–${w.weekEnd}</span><small>${parts}</small></button>`;
  }).join('');
  const filter=`<div class="calendarFilters"><label><input type="checkbox" ${visibility.training?'checked':''} onchange="setCalendarVisibility('training',this.checked)"> trening</label><label><input type="checkbox" ${visibility.measure?'checked':''} onchange="setCalendarVisibility('measure',this.checked)"> pomiary</label><label><input type="checkbox" ${visibility.photo?'checked':''} onchange="setCalendarVisibility('photo',this.checked)"> zdjęcia</label><label><input type="checkbox" ${visibility.injection?'checked':''} onchange="setCalendarVisibility('injection',this.checked)"> iniekcje</label><label><input type="checkbox" ${visibility.duty?'checked':''} onchange="setCalendarVisibility('duty',this.checked)"> dyżury</label><label><input type="checkbox" ${visibility.plans?'checked':''} onchange="setCalendarVisibility('plans',this.checked)"> plany</label></div>`;
- document.getElementById('calendar').innerHTML=`<div class="card"><h2>Kalendarz — ${monthLabel(year,month)}</h2><div class="calendarNav"><div class="navBtns"><button class="ghost" onclick="calendarPrevMonth()">←</button><button class="primary" onclick="calendarToday()">Dzisiaj</button><button class="ghost" onclick="calendarNextMonth()">→</button></div></div>${filter}<div class="legend"><span class="badge">kolor pełny = wykonane</span><span class="badge">niebieskie przerywane = plan</span><span class="badge">maks. 1 oznaczenie danego rodzaju na tydzień</span></div><div class="calendarWrap"><div class="calendar">${header}${rows}</div></div></div><div class="card"><h2>Podsumowanie tygodni</h2><div class="weekSummaryList">${summary}</div></div><div id="dayEditor"></div>`;
+ document.getElementById('calendar').innerHTML=`<div class="card"><h2>Kalendarz — ${monthLabel(year,month)}</h2><div class="calendarNav"><div class="navBtns"><button class="ghost" onclick="calendarPrevMonth()">←</button><button class="primary" onclick="calendarToday()">Dzisiaj</button><button class="ghost" onclick="calendarNextMonth()">→</button></div></div>${filter}<div class="legend"><span class="badge">kolor pełny = wykonane</span><span class="badge">niebieskie przerywane = plan</span><span class="badge">każdy wpis = ikona w konkretnym dniu</span></div><div class="calendarWrap"><div class="calendar">${header}${rows}</div></div></div><div class="card"><h2>Podsumowanie tygodni</h2><div class="weekSummaryList">${summary}</div></div><div id="dayEditor"></div>`;
 }
 function editDay(date){
  const d=calData()[date]||{},e=dayEntry(date),b=bodyData().find(x=>x.date===date)||{},logs=workoutLog().filter(x=>x.date===date),ph=photos().find(x=>x.date===date),done=completedTrainingsForDate(date);selectedBodyDate=date;selectedWorkoutDate=date;
@@ -3752,46 +3752,67 @@ Object.assign(window,{
 });
 </script>
 
-<script id="forma-v185-series-rotation">
-/* ===== Forma PRO v18.5 — ćwiczenia przypisane do konkretnej serii ===== */
-function formaV185SeriesOnly(exr){
- const raw=Number(exr?.seriesOnly||exr?.onlySeries||0);
- return Number.isFinite(raw)&&raw>=1?Math.round(raw):0;
+
+<script id="forma-v186-calendar-exact-markers">
+/* ===== Forma PRO v18.6 — dokładne znaczniki kalendarza ===== */
+calendarMarkerMap=window.calendarMarkerMap=function calendarMarkerMapV186(dates){
+ const map={};
+ dates.forEach(date=>{
+  const day=calData()[date]||{};
+  Object.entries(CALENDAR_TYPES).forEach(([type,cfg])=>{
+   const actual=!!cfg.actual(date);
+   const planned=!!(cfg.plan&&day[cfg.plan]);
+   if(actual){
+    (map[date]||(map[date]=[])).push({type,planned:false,weekStart:iso(mondayOf(date))});
+   }else if(planned){
+    (map[date]||(map[date]=[])).push({type,planned:true,weekStart:iso(mondayOf(date))});
+   }
+  });
+ });
+ const weeks=[...new Set(dates.map(d=>iso(mondayOf(d))))].map(calendarWeekInfo);
+ return {map,weeks};
+};
+
+function formaV186Toast(text){
+ let box=document.getElementById('formaV186Toast');
+ if(!box){
+  box=document.createElement('div');box.id='formaV186Toast';
+  box.style.cssText='position:fixed;right:14px;bottom:18px;z-index:99999;background:#0f172a;border:1px solid #334155;border-radius:12px;padding:11px 14px;box-shadow:0 10px 30px #0008;font-weight:700;color:#e2e8f0;max-width:min(90vw,360px)';
+  document.body.appendChild(box);
+ }
+ box.textContent=text;box.style.display='block';
+ clearTimeout(box._hide);box._hide=setTimeout(()=>{box.style.display='none'},1800);
 }
 
-circuitSteps=window.circuitSteps=function circuitStepsV185(){
- const cur=todayWorkout(),exs=cur?.ex||[];let steps=[];
- const maxSets=Math.max(1,...exs.map(e=>Math.max(Number(e.sets||1),formaV185SeriesOnly(e))));
- for(let s=1;s<=maxSets;s++){
-  exs.forEach((e,i)=>{
-   const only=formaV185SeriesOnly(e);
-   if(only){if(s===only)steps.push({set:s,idx:i,e});return;}
-   if(typeof formaV184IsLastSeriesOnlyExercise==='function'&&formaV184IsLastSeriesOnlyExercise(e)){
-    if(s===maxSets)steps.push({set:s,idx:i,e});
-    return;
-   }
-   if(Number(e.sets||1)>=s)steps.push({set:s,idx:i,e});
-  });
- }
- return steps;
+saveDayFlags=window.saveDayFlags=function saveDayFlagsV186(date){
+ const old=calData()[date]||{};
+ const duty=!!document.getElementById('edDuty')?.checked;
+ const training=!!document.getElementById('edTraining')?.checked;
+ const injection=!!document.getElementById('edInjection')?.checked;
+ const injectionNote=String(document.getElementById('edInjectionNote')?.value||'').trim();
+ formaV184SaveDayActivity(date);
+
+ let c=calData();
+ c[date]={...old,duty,training,injection,injectionNote};
+ jset(KEYS.calendar,pruneEmptyCalendar(c));
+
+ if(old.injection&&!injection)clearPlansFrom('injection',date);
+ setPlanForDate('training',date,!!document.getElementById('edPlanTraining')?.checked);
+ setPlanForDate('measure',date,!!document.getElementById('edPlanMeasure')?.checked);
+ setPlanForDate('photo',date,!!document.getElementById('edPlanPhoto')?.checked);
+ setPlanForDate('injection',date,!!document.getElementById('edPlanInjection')?.checked);
+
+ if(training&&!old.training)completeRecurringTask('training',date,false);
+ if(injection&&!old.injection)completeRecurringTask('injection',date,true);
+ cleanupExpiredPlans();
+
+ /* Renderuj kalendarz bezpośrednio, aby zmiana była widoczna natychmiast. */
+ renderCalendar();
+ editDay(date);
+ formaV186Toast('Zapisano dzień — kalendarz zaktualizowany');
 };
 
-exerciseTargetForSet=window.exerciseTargetForSet=function exerciseTargetForSetV185(exr,setNo){
- const sets=Math.max(1,Number(exr?.sets||1));
- const only=formaV185SeriesOnly(exr);
- const fixed=!!only||(typeof formaV184IsLastSeriesOnlyExercise==='function'&&formaV184IsLastSeriesOnlyExercise(exr))||(typeof formaV183IsFixedTargetExercise==='function'&&formaV183IsFixedTargetExercise(exr));
- const factor=fixed?1:formaSeriesFactor(setNo,sets);
- const suggested=typeof exerciseSuggestion==='function'?exerciseSuggestion(exr):{};
- const baseReps=Number(exr?.reps||suggested.reps||0),baseSeconds=Number(exr?.seconds||suggested.seconds||0);
- return {
-  reps:baseReps?(fixed?formaV183Even(baseReps):formaV183EvenRepsForSet(baseReps,setNo,sets)):'',
-  seconds:baseSeconds?(fixed?formaRoundTime(baseSeconds):formaRoundTime(baseSeconds*factor)):'',
-  load:suggested.load||'',factor,fixed,seriesOnly:only
- };
-};
-
-Object.assign(window,{circuitSteps,exerciseTargetForSet,formaV185SeriesOnly});
+Object.assign(window,{calendarMarkerMap,saveDayFlags,formaV186Toast});
 </script>
-
 </body>
 </html>

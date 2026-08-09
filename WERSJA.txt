@@ -1,1 +1,2 @@
-Forma PRO PWA v18.5 — stały rdzeń każdego zestawu i ćwiczenia miednica/joga przypisane do serii 1/2/3
+Forma PRO v18.6
+Naprawa kalendarza: dokładne ikony w konkretnym dniu, natychmiastowe odświeżanie po zapisie.
