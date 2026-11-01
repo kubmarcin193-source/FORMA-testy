@@ -1,2 +1,2 @@
-Forma PRO v18.6
-Naprawa kalendarza: dokładne ikony w konkretnym dniu, natychmiastowe odświeżanie po zapisie.
+Forma PRO TESTY 18.7.1
+Izolacja danych i cache od FORMA; poprawki offline, odczytu danych i dostępności.

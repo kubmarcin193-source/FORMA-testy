@@ -3,8 +3,8 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>Forma PRO</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forma PRO — testy</title>
 <meta name="theme-color" content="#38bdf8">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -206,6 +206,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 @media(max-width:650px){
  header{padding:11px 12px}.tabs{top:65px}.card{border-radius:17px}.workoutPlayerControls{gap:4px!important;padding:7px 5px calc(7px + env(safe-area-inset-bottom))!important}.workoutPlayerControls button{font-size:clamp(9px,2.55vw,12px)!important;padding:7px 3px!important;min-height:52px!important;border-radius:9px!important}.workoutPlayerStatus{font-size:9px!important}}
 </style>
+<style>:focus-visible{outline:3px solid #fbbf24;outline-offset:3px} @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}} input[type=checkbox]{width:auto}</style>
 </head>
 <body class="auth-locked">
 
@@ -229,6 +230,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 </div>
 
 <header>
+  <div role="status" style="padding:6px 0;color:#fbbf24;font-weight:700">WERSJA TESTOWA · <span id="connectionState"></span></div>
   <h1>Forma PRO</h1>
   <small>treningi • progres • pomiary • zdjęcia • prywatne dane</small>
   <br><button id="installAppBtn" class="install-app-btn" type="button" hidden>📲 Zainstaluj aplikację</button>
@@ -262,14 +264,14 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 
 
 <script>
 const KEYS={
- data:"forma_pro_days_v4",settings:"forma_pro_settings_v4",body:"forma_pro_body_v4",meals:"forma_pro_meals_v4",
- photos:"forma_pro_photos_v4",protein:"forma_pro_protein_v4",products:"forma_pro_products_v4",
- calendar:"forma_pro_calendar_v4",workouts:"forma_pro_workouts_v4",privatePass:"forma_pro_private_pass_v4",
- privateData:"forma_pro_private_data_v4",privatePhotos:"forma_pro_private_photos_v4",workoutLog:"forma_pro_workout_log_v4",
- calendarPlanVersion:"forma_pro_calendar_plan_v2",calendarPlanCarry:"forma_pro_calendar_plan_carry_v1",backExerciseUpgrade:"forma_pro_back_exercises_v1",benchBandUpgrade:"forma_pro_bench_band_pack_v1"
+ data:"forma_testy_days_v4",settings:"forma_testy_settings_v4",body:"forma_testy_body_v4",meals:"forma_testy_meals_v4",
+ photos:"forma_testy_photos_v4",protein:"forma_testy_protein_v4",products:"forma_testy_products_v4",
+ calendar:"forma_testy_calendar_v4",workouts:"forma_testy_workouts_v4",privatePass:"forma_testy_private_pass_v4",
+ privateData:"forma_testy_private_data_v4",privatePhotos:"forma_testy_private_photos_v4",workoutLog:"forma_testy_workout_log_v4",
+ calendarPlanVersion:"forma_testy_calendar_plan_v2",calendarPlanCarry:"forma_testy_calendar_plan_carry_v1",backExerciseUpgrade:"forma_testy_back_exercises_v1",benchBandUpgrade:"forma_testy_bench_band_pack_v1"
 };
 
-const MEDIA_DB="forma_pro_media_db_v1";
+const MEDIA_DB="forma_testy_media_db_v1";
 const MEDIA_STORE="media";
 const MEDIA_CACHE={};
 let mediaDbPromise=null;
@@ -355,7 +357,12 @@ function jget(k,def){
  try{
   const raw=localStorage.getItem(k);
   if(raw===null||raw===undefined||raw==='') return def;
-  return JSON.parse(raw);
+  const value=JSON.parse(raw);
+  if(value===null) return def;
+  if(def!==null && typeof def==='object'){
+   if(typeof value!=='object' || Array.isArray(value)!==Array.isArray(def)) return def;
+  }
+  return value;
  }catch(e){
   console.warn('Uszkodzone dane localStorage:',k,e);
   return def;
@@ -660,7 +667,7 @@ function renderQuick(){
  <label>Bieżnia — minuty</label><input id="qTreadmill" type="number" value="${e.treadmillMin}" placeholder="minimum ${settings().treadmillMin}">
  <label>Domowa siłownia — minuty</label><input id="qGym" type="number" value="${e.gymMin}" placeholder="minimum ${settings().gymMin}">
  <label>Waga / opcjonalnie</label><input id="qWeight" type="number" step="0.1" value="${e.weight}" placeholder="np. 95.4">
- <label>Notatka / opcjonalnie</label><textarea id="qNote">${e.note||""}</textarea>
+ <label>Notatka / opcjonalnie</label><textarea id="qNote">${esc(e.note||"")}</textarea>
  <button class="primary" onclick="saveQuick()">Zapisz 30 sekund</button></div>`;
 }
 function saveQuick(){
@@ -1415,7 +1422,7 @@ async function exportAll(){
 
  let a=document.createElement("a");
  a.href=URL.createObjectURL(new Blob([JSON.stringify(pack,null,2)],{type:"application/json;charset=utf-8"}));
- a.download=`forma_pro_backup_pelny_zdjecia_${stamp}.json`;
+ a.download=`forma_testy_backup_pelny_zdjecia_${stamp}.json`;
  a.click();
  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
  alert(`Eksport gotowy. Zapisane pliki zdjęć w backupie: ${pack.stats.savedMediaFiles}.`);
@@ -1658,7 +1665,7 @@ const APP_DATA_VERSION=16;
 const APP_RELEASE="18.6.0";
 const BACKUP_FORMAT_VERSION=4;
 const EXERCISE_BACKUP_VERSION=1;
-const AUTO_BACKUP_DB="forma_pro_auto_backup_db_v1";
+const AUTO_BACKUP_DB="forma_testy_auto_backup_db_v1";
 const AUTO_BACKUP_STORE="snapshots";
 const AUTO_BACKUP_LIMIT=5;
 let AUTO_BACKUP_SUSPENDED=false;
@@ -1670,13 +1677,13 @@ let setEditorTargetIndex=null;
 let activeWorkoutSession={startedAt:null,results:{}};
 
 Object.assign(KEYS,{
- appDataVersion:"forma_pro_app_data_version",
- exerciseLibrary:"forma_pro_exercise_library_v1",
- calendarVisibility:"forma_pro_calendar_visibility_v1",
- autoBackupSignature:"forma_pro_auto_backup_signature_v1",
- autoBackupAt:"forma_pro_auto_backup_at_v1",
- autoBackupError:"forma_pro_auto_backup_error_v1",
- workoutUpgradeV12:"forma_pro_workout_upgrade_v12"
+ appDataVersion:"forma_testy_app_data_version",
+ exerciseLibrary:"forma_testy_exercise_library_v1",
+ calendarVisibility:"forma_testy_calendar_visibility_v1",
+ autoBackupSignature:"forma_testy_auto_backup_signature_v1",
+ autoBackupAt:"forma_testy_auto_backup_at_v1",
+ autoBackupError:"forma_testy_auto_backup_error_v1",
+ workoutUpgradeV12:"forma_testy_workout_upgrade_v12"
 });
 Object.assign(defaultSettings,{autoBackup:true,showPhotoSummary:false});
 
@@ -2297,7 +2304,7 @@ function migrateBackupPackage(raw){
  return x;
 }
 async function exportAll(){
- const pack=await buildFullBackupPackage(),stamp=iso();const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(pack,null,2)],{type:'application/json;charset=utf-8'}));a.download=`forma_pro_pelna_kopia_${stamp}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);alert(`Kopia gotowa: ${pack.stats.savedMediaFiles} plików zdjęć.`);
+ const pack=await buildFullBackupPackage(),stamp=iso();const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(pack,null,2)],{type:'application/json;charset=utf-8'}));a.download=`forma_testy_pelna_kopia_${stamp}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);alert(`Kopia gotowa: ${pack.stats.savedMediaFiles} plików zdjęć.`);
 }
 async function clearKnownAppData(){
  Object.values(KEYS).forEach(k=>{if(k!==KEYS.autoBackupSignature&&k!==KEYS.autoBackupAt&&k!==KEYS.autoBackupError)localStorage.removeItem(k)});await clearMediaStore();
@@ -2407,7 +2414,7 @@ async function exportExercises(){
   const pack=await buildExerciseBackupPackage();
   if(pack.stats.missingMediaFiles){alert(`Nie wykonano eksportu. Brakuje ${pack.stats.missingMediaFiles} zdjęć wskazanych przez ćwiczenia. Otwórz ćwiczenia, zapisz zdjęcia ponownie i spróbuj jeszcze raz.`);return}
   const url=URL.createObjectURL(new Blob([JSON.stringify(pack,null,2)],{type:'application/json;charset=utf-8'}));
-  const a=document.createElement('a');a.href=url;a.download=`forma_pro_cwiczenia_zestawy_${iso()}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
+  const a=document.createElement('a');a.href=url;a.download=`forma_testy_cwiczenia_zestawy_${iso()}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
   alert(`Eksport gotowy.\nZestawy: ${pack.stats.workoutSets}\nĆwiczenia w zestawach: ${pack.stats.exercises}\nBiblioteka: ${pack.stats.exerciseLibrary}\nHistoria progresu: ${pack.stats.workoutLog}\nZdjęcia ćwiczeń: ${pack.stats.savedMediaFiles}`);
  }catch(e){console.error(e);alert('Nie udało się wyeksportować zakładki Ćwiczenia.')}
 }
@@ -2526,11 +2533,11 @@ Object.assign(window,{setCalendarVisibility,openCalendarIcon,openSetEditor,rende
    Pierwsze uruchomienie wymaga ustalonego hasła właściciela.
    Jawne hasło nie jest zapisane w plikach. Statyczna aplikacja zawiera wyłącznie
    sól i weryfikator PBKDF2 potrzebny do lokalnego sprawdzenia hasła. */
-const APP_AUTH_CONFIG_KEY="forma_pro_auth_config_v2";
+const APP_AUTH_CONFIG_KEY="forma_testy_auth_config_v2";
 const APP_AUTH_PBKDF2_ITERATIONS=310000;
 const APP_AUTH_FIXED_SALT="WpJ/Jl8o6+dM9+g6sifA/Q==";
 const APP_AUTH_FIXED_VERIFIER="DCUGUSIbgPdQd7XuSh6PTWvHr5J12aYbwpQP+eLmAEE=";
-const APP_AUTH_MOBILE_TRUST_KEY="forma_pro_mobile_verified_v2";
+const APP_AUTH_MOBILE_TRUST_KEY="forma_testy_mobile_verified_v2";
 const APP_AUTH_DESKTOP_IDLE_MS=5*60*1000;
 let formaAuthIsPhone=false;
 let formaAuthUnlocked=false;
@@ -2767,7 +2774,7 @@ if("serviceWorker" in navigator){
 
 <script>
 /* ===== Forma PRO v16 — pełnoekranowy tryb treningowy ===== */
-const WORKOUT_SESSION_KEY='forma_pro_active_workout_v1';
+const WORKOUT_SESSION_KEY='forma_testy_active_workout_v1';
 let workoutSessionActive=false;
 let workoutTimerRunning=false;
 let workoutTimerEndsAt=0;
@@ -3382,7 +3389,7 @@ Object.assign(window,{ensureWorkoutAudio,primeWorkoutAudio,playWorkoutTone,worko
 
 <script>
 /* ===== Forma PRO v18.3 — parzyste cele, joga bez redukcji, historia czasu i automatyczna rotacja ===== */
-const FORMA_NEXT_WORKOUT_KEY='forma_pro_next_workout_id_v183';
+const FORMA_NEXT_WORKOUT_KEY='forma_testy_next_workout_id_v183';
 let formaV183WorkoutSignature='';
 
 function formaV183WorkoutListSignature(){return workouts().map(x=>String(x.id||x.name||'')).join('|')}
@@ -3813,6 +3820,12 @@ saveDayFlags=window.saveDayFlags=function saveDayFlagsV186(date){
 };
 
 Object.assign(window,{calendarMarkerMap,saveDayFlags,formaV186Toast});
+</script>
+<script>
+function updateConnectionState(){const el=document.getElementById('connectionState');if(el)el.textContent=navigator.onLine?'online':'offline — dane zapisujesz na tym urządzeniu';}
+window.addEventListener('online',updateConnectionState);
+window.addEventListener('offline',updateConnectionState);
+updateConnectionState();
 </script>
 </body>
 </html>

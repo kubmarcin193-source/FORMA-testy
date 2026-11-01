@@ -1,7 +1,7 @@
 {
   "id": "./",
-  "name": "Forma PRO",
-  "short_name": "Forma PRO",
+  "name": "Forma PRO — testy",
+  "short_name": "Forma Testy",
   "description": "Aplikacja fitness do treningów, pomiarów, zdjęć sylwetki, kalendarza i śledzenia postępów.",
   "lang": "pl-PL",
   "start_url": "./index.html",

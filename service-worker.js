@@ -1,6 +1,6 @@
 /* Forma PRO — stabilny PWA dla GitHub Pages */
-const CACHE_NAME = "forma-pro-pwa-v18-6-calendar-exact-2026-08-09";
-const CACHE_PREFIX = "forma-pro-pwa-";
+const CACHE_NAME = "forma-testy-pwa-v18-7-1";
+const CACHE_PREFIX = "forma-testy-pwa-";
 
 const APP_SHELL = [
   "./",
@@ -58,7 +58,7 @@ self.addEventListener("fetch", (event) => {
   if(request.method !== "GET") return;
 
   const url = new URL(request.url);
-  if(url.origin !== self.location.origin) return;
+  if(url.origin !== self.location.origin || !url.href.startsWith(self.registration.scope)) return;
 
   if(request.mode === "navigate"){
     event.respondWith(
@@ -67,17 +67,17 @@ self.addEventListener("fetch", (event) => {
           if(response && response.ok){
             const copy = response.clone();
             caches.open(CACHE_NAME)
-              .then((cache) => cache.put("./index.html", copy));
+              .then((cache) => cache.put(request, copy));
           }
           return response;
         })
-        .catch(() => caches.match("./index.html"))
+        .catch(async () => (await caches.match(request)) || (await caches.match(new URL("./index.html", self.registration.scope).href)) || Response.error())
     );
     return;
   }
 
   event.respondWith(
-    caches.match(request, {ignoreSearch: true})
+    caches.match(request)
       .then((cached) => cached || fetch(request).then((response) => {
         if(response && response.ok && response.type === "basic"){
           const copy = response.clone();
